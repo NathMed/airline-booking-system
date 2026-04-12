@@ -96,7 +96,8 @@ The Airline Booking System is a **standalone web application** designed to provi
 ### 5.1 Key Screen References
 
 | Screen / Component | Description | Key UI Elements |
-| Hero / Landing | The entry point for all users. | Search widget (One-way/Round-trip) | Background aircraft image with Top-Down Linear Gradient. |
+| :--- | :--- | :--- |
+| Hero / Landing | The entry point for all users. | Search widget (One-way/Round-trip) Background aircraft image with Top-Down Linear Gradient. |
 | Search Widget | The primary data-entry tool. | From/To dropdowns, Departure Date picker, Passenger count, ""Book now!"" button. |
 | Featured Destinations | Dynamic grid of top travel spots. | 2-column responsive grid, fixed aspect-ratio images, location detection "Traveling from your location." |
 | Interactive Cabin | Seat selection interface. | 2D Seat Map, Legend (Available, Occupied, Selected), ""Seat Locked"" timer logic. | 
