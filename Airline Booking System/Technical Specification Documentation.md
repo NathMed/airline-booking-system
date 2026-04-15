@@ -44,9 +44,6 @@ The Airline Booking System is a web-based platform designed to facilitate flight
 * **Out-of-Scope:** Actual credit card or e-wallet processing (mock payments only), real-time radar tracking, and global distribution system (GDS) live sync.
 
 ### 3.4 Technology Stack
-* **Frontend:** [Technology]
-* **Backend:** [Technology]
-* **Database:** [Technology]
 * **Frontend:** HTML/CSS, Bootstrap
 * **Backend:** Node.js, Express.js
 * **Database:** MongoDB
@@ -321,7 +318,6 @@ A personalized hub for managing the travel lifecycle.
 
 ## 11. Glossary
 - **SKU**: Stock Keeping Unit
-- **API:** Application Programming Interface - a set of rules enabling software components to communicate
 - **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action
 - **API(Application Programming Interface)**: A defined set of rules enabling software components to communicate with each other.
 - **Bootstrap 5**: A popular open-source CSS framework for building responsive, mobile-first web pages using pre-built UI components. 
