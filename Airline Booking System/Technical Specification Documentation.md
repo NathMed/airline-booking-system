@@ -45,15 +45,18 @@ The Airline Booking System is a web-based platform designed to facilitate flight
 * **Out-of-Scope:** Actual credit card or e-wallet processing (mock payments only), real-time radar tracking, and global distribution system (GDS) live sync.
 
 ### 3.4 Technology Stack
-* **Frontend:** [Technology]
-* **Backend:** [Technology]
-* **Database:** [Technology]
+* **Frontend:** HTML/CSS, Bootstrap
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB
+* **API Testing:** Postman
+* **Design:** Figma
+* **Project Management:** Trello
 
 ### 3.5 Definition of Terms & Acronyms
-* **PNR:** Passenger Name Record
-* **UID:** User Identification
-* **API:** Application Programming Interface
-* **CTA:** Call To Action
+* **PNR:** Passenger Name Record- a unique booking reference code generated per reservation
+* **UID:** User Identification - a unique identifier assigned to each registered user account
+* **API:** Application Programming Interface - a set of rules enabling software components to communicate
+* **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action
 
 ## 4. Overall Description
 
@@ -88,9 +91,11 @@ The Airline Booking System is a **standalone web application** designed to provi
 * **Design System & Branding**: 
 - **Theme Name**: Flight 606 (Premium Aviation Aesthetic)
 - **Color Palette**: 
-    - **Primary**: Input sample *(hashcode here)* for navigation and text.
-    - **Accent**: Golden Hour Gold *(hashcode here)* for the primary search widget and "Book Now" highlights.
-    - **Action**: CTA Button here *(hashcode here)*
+    - **Primary**: Rich Charcoal *(#1F1F1F)* for navigation and text.
+    - **Accent**: Golden Sand *(#D4B982)* for the primary search widgets.
+    - **Action**: Deep Navy *(#1B2B48)* for the CTA button.
+    - **Background**: Champagne Cream *(#F9F6ED)* for the page background
+
 - **Design Patterns**: High-contrast text overlays, linear gradients for legibility, and back-drop filters for container elements. 
 
 ### 5.1 Key Screen References
@@ -186,6 +191,24 @@ A personalized hub for managing the travel lifecycle.
   - **Outputs**: System accepts the input
   - **Error Handling**: Look for duplicates 
 
+- **Feature 4**: Seat Selection
+  - **Description**: Allow users to select available seats.
+  - **Priority**: High
+  - **Inputs**: Selected seat from cabin map.
+  - **Processing**: Validate input required
+  - **Outputs**: Seat marked as 'Selected'; lock timer starts.
+  - **Error Handling**: Seat taken by another user- prompt to select anothe seat. 
+
+- **Feature 5**: Booking Confirmation
+  - **Description**: Notifies the user when the Booking is successful.
+  - **Priority**: High
+  - **Inputs**: Confirmed passenger and seat data.
+  - **Processing**: Validate input required
+  - **Outputs**: Unique PNR generated; confirmation screen shown.
+  - **Error Handling**: Payment fails- booking not saved; user prompted to retry. 
+
+
+
 
 ## 8. Non-Functional Requirements
 - **Performance**: 
@@ -226,12 +249,27 @@ A personalized hub for managing the travel lifecycle.
   - Connect with the payment gateway for transactions.
 
 ## 11. Glossary
-- **SKU**: Stock Keeping Unit
-- **API**: Application Programming Interface
+- **API(Application Programming Interface)**: A defined set of rules enabling software components to communicate with each other.
+- **Bootstrap 5**: A popular open-source CSS framework for building responsive, mobile-first web pages using pre-built UI components. 
+- **Express.js**: A lightweight and flexible Node.js web application framework used to build server-side applications and RESTful APIs. 
+- **GDS(Global Distribution System)**: a network platform used by travel agencies to access real-time airline seat inventory and pricing. 
+- **MongoDB**: A NoSQL, document-oriented database that stores data in flexible JSON-like documents instead of fixed relational tables
+- **Node.js**: An open-source, cross-platform JavaScript runtime environment that executes JavaScript code server-side. 
+- **PNR(Passenger Name Record)**: A unique alphanumeric booking reference code generated for each confirmed reservation. 
+- **Postman**: A collaborative platform and tool used by developers to design, test, and debug API endpoints during development. 
+- **REST(Representational State Transfer)**: A standard architectural style for designing networked APIs using HTTP methods. 
+- **UID(User Identification)**: A unique identifier automatically assigned to each registered user account in the system.
 
 ## 12. Appendices
 - **Supporting Information**: 
-  - User flow diagrams
-  - Wireframes
+  - User flow diagrams- TBD
+  - Wireframes- TBD
+  - Trello Board- TBD
+  - Figma Mockups- TBD
+
 - **Revision History**: 
-  - **v1.0**: Initial version - June 20, 2024
+  - **v1.0**: Initial version - April 11, 2026
+  - **v1.1**: First revision - April 14, 2026
+      - Added details on Section 3.4, 3.5, 5.
+      - Added Feature 4 & 5 on system requirements
+      - Added Glossary terms and Appendices
