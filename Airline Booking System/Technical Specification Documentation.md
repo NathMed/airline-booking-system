@@ -81,10 +81,6 @@ The Airline Booking System is a **standalone web application** designed to provi
 * **Design System & Branding**: 
 - **Theme Name**: Flight 606 (Premium Aviation Aesthetic)
 - **Color Palette**: 
-    - **Primary**: Deep Navy *#1B2B48* for navigation and text.
-    - **Accent**: Golden Sand *#D4B982* for the primary search widget and "Book Now" highlights.
-    - **Action**: Deep Navy *#1B2B48* for the CTA button.
-    - **Background**: Champagne Cream *#F9F8ED* for the page background.
 - **Design Patterns**: High-contrast text overlays, linear gradients for legibility, and back-drop filters for container elements. 
 
 ### 5.1 Key Screen References
