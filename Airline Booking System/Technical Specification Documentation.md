@@ -52,12 +52,6 @@ The Airline Booking System is a web-based platform designed to facilitate flight
 * **Design:** Figma
 * **Project Management:** Trello
 
-### 3.5 Definition of Terms & Acronyms
-* **PNR:** Passenger Name Record- a unique booking reference code generated per reservation
-* **UID:** User Identification - a unique identifier assigned to each registered user account
-* **API:** Application Programming Interface - a set of rules enabling software components to communicate
-* **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action
-
 ## 4. Overall Description
 
 ### 4.1 Product Perspective
@@ -95,7 +89,6 @@ The Airline Booking System is a **standalone web application** designed to provi
     - **Accent**: Golden Sand *(#D4B982)* for the primary search widgets.
     - **Action**: Deep Navy *(#1B2B48)* for the CTA button.
     - **Background**: Champagne Cream *(#F9F6ED)* for the page background
-
 - **Design Patterns**: High-contrast text overlays, linear gradients for legibility, and back-drop filters for container elements. 
 
 ### 5.1 Key Screen References
@@ -191,7 +184,7 @@ A personalized hub for managing the travel lifecycle.
   - **Outputs**: System accepts the input
   - **Error Handling**: Look for duplicates 
 
-- **Feature 4**: Seat Selection
+- **Feature 7**: Seat Selection
   - **Description**: Allow users to select available seats.
   - **Priority**: High
   - **Inputs**: Selected seat from cabin map.
@@ -199,7 +192,7 @@ A personalized hub for managing the travel lifecycle.
   - **Outputs**: Seat marked as 'Selected'; lock timer starts.
   - **Error Handling**: Seat taken by another user- prompt to select anothe seat. 
 
-- **Feature 5**: Booking Confirmation
+- **Feature 8**: Booking Confirmation
   - **Description**: Notifies the user when the Booking is successful.
   - **Priority**: High
   - **Inputs**: Confirmed passenger and seat data.
@@ -249,6 +242,8 @@ A personalized hub for managing the travel lifecycle.
   - Connect with the payment gateway for transactions.
 
 ## 11. Glossary
+- **API:** Application Programming Interface - a set of rules enabling software components to communicate
+- **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action
 - **API(Application Programming Interface)**: A defined set of rules enabling software components to communicate with each other.
 - **Bootstrap 5**: A popular open-source CSS framework for building responsive, mobile-first web pages using pre-built UI components. 
 - **Express.js**: A lightweight and flexible Node.js web application framework used to build server-side applications and RESTful APIs. 
@@ -271,5 +266,5 @@ A personalized hub for managing the travel lifecycle.
   - **v1.0**: Initial version - April 11, 2026
   - **v1.1**: First revision - April 14, 2026
       - Added details on Section 3.4, 3.5, 5.
-      - Added Feature 4 & 5 on system requirements
+      - Added Feature 7 & 8 on system requirements
       - Added Glossary terms and Appendices
