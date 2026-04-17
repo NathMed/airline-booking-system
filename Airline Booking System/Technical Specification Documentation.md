@@ -81,6 +81,10 @@ The Airline Booking System is a **standalone web application** designed to provi
 ## 5. Visual Mockup Reference 
 > [!IMPORTANT]
 > **View High-Fidelity Mockups:** [https://www.figma.com/design/kgJUpm3z5jK5Ya3jaDYiQ8/APRIL-PROJECT?node-id=37-6284&t=KInoG9fmcZiqOFzD-0]
+
+> [!IMPORTANT]
+> **Blueprint of the System:** [https://drive.google.com/file/d/1k1MKMJo1E8MnAvm5vZh1KCKPLOtEL_ba/view]
+
 * **Design System & Branding**: 
 - **Theme Name**: Flight 606 (Premium Aviation Aesthetic)
 - **Color Palette**: 
@@ -103,11 +107,24 @@ The Airline Booking System is a **standalone web application** designed to provi
 | Footer | Site-wide navigation and brand links. |  Multi-column link groups (Other Offerings, About Us, Corporate Travel, AskMH), newsletter Subscribe CTA, social media icons, legal links. |
 
 ### 5.2 UI Logic Requirements
-- **Legibility Masking**: All hero images must utilize a \\input your description and hashcode here if available\\
-- **State Feedback**:  
-    - **Hover State**: \\input your description and hashcode here if available\\
-    - **Active State**: \\input your description and hashcode here if available\\
-    - **Loading State** \\input your description and hashcode here if available\\
+- **Hero & Navigation Logic**: 
+  - **Sticky Header Transition**: As the user scrolls past the Hero image ($> 600px$), the navigation bar should transition from transparent to Rich Charcoal (#1F1F1F) with $90\%$ opacity to maintain legibility over content.
+  - **Dynamic Tagline Carousel**: The text within the frosted glass box ("This view never gets old," "On cloud nine") should auto-rotate every $5$ seconds with a soft fade-in/out effect.
+  - **Progress Slider**: The white progress bar below the tagline must sync with the carousel timer. Clicking the left/right arrows manually resets the timer to zero.
+
+- **Smart Search Widget Logic**:  
+    - **Trip Type Toggle**: Switching from "One way" to "Multi-city" must dynamically inject a new row of input fields (From/To) into the widget, expanding the golden container's height smoothly.
+    - **Date Picker Constraint**: The "Departure Date" calendar must disable all dates prior to CurrentDate(). For "Round trip," the "Return Date" must disable all dates prior to the selected "Departure Date."
+    - **Search Validation** The "Book now!" button remains disabled or returns an animation if the "From" and "To" fields are identical or if the date field is null.
+
+- **Traveling From Your Location**:
+  - **IP-Based Geolocation**: On page load, the system requests the user's location. If granted, the "Traveling from your location" text updates to "Flights from Manila" (or current city), and the "From" input in the search widget pre-populates with the nearest airport code (e.g., MNL).
+  - **Real-time Pricing Sync**: The price labels (e.g., $₱ 6,999$) should pull from a min_price variable in your Flights table. If a user changes their location, these cards should trigger a "shimmer" loading effect and refresh with new data.
+
+- **Card Interaction & Animation**:
+  - **Destination Card Hover**: On :hover, the destination image should scale by $1.05\times$ within its container (zoom effect) while the "Rich Charcoal" text on the right remains static. This provides tactile feedback without moving the text.
+  - **View All / Explore More** Clicking "Explore more destinations" should trigger a smooth scroll or route change to a dedicated Catalog page with active category filters (e.g., "Beach," "City").
+
 
 ## 6. System Features
 ### 6.1 Smart Flight Search Engine
