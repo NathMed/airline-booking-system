@@ -302,12 +302,12 @@ A personalized hub for managing the travel lifecycle.
 - **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action.
 - **Express.js**: A lightweight and flexible Node.js web application framework used to build server-side applications and RESTful APIs.
 - **GDS(Global Distribution System)**: a network platform used by travel agencies to access real-time airline seat inventory and pricing.
-- **SKU**: Stock Keeping Unit.
 - **MongoDB**: A NoSQL, document-oriented database that stores data in flexible JSON-like documents instead of fixed relational tables
 - **Node.js**: An open-source, cross-platform JavaScript runtime environment that executes JavaScript code server-side. 
 - **PNR(Passenger Name Record)**: A unique alphanumeric booking reference code generated for each confirmed reservation. 
 - **Postman**: A collaborative platform and tool used by developers to design, test, and debug API endpoints during development. 
 - **REST(Representational State Transfer)**: A standard architectural style for designing networked APIs using HTTP methods. 
+- **SKU**: Stock Keeping Unit.
 - **UID(User Identification)**: A unique identifier automatically assigned to each registered user account in the system.
 
 ## 12. Appendices
