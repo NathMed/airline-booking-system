@@ -266,7 +266,7 @@ A personalized hub for managing the travel lifecycle.
   - **Itinerary**: { id, userId, name, notes, createdAt }
   - **Itinerary Booking**: { id, itineraryId, bookingId, sortOrder }
   - **Notification**: { id, userId, bookingId, type, message, isRead, sentAt }
-  - **Passenger**: { id, firstName, lastName, dateOfBirth, passportNumber }
+  - **Passenger**: { id, firstName, lastName, dateOfBirth, seatNumber, passportNumber }
   - **Payment**: { bookingId, paymentMethod, status, amount, transactionId, paidAt }
   - **Travelers Profile**: { id, userId, firstName, lastName, dateOfBirth, passportNumber }
   - **User**: { id, email, password }
