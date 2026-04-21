@@ -34,13 +34,13 @@
 ## 3. Introduction
 
 ### 3.1 Purpose
-To architect a seamless, 'cloud-nine' travel experience. This document details the technical infrastructure required to power a modern airline booking platform, focusing on real-time availability, modern web-design, and robust data integrity.
+To architect a seamless, 'Flight 606' travel experience. This document details the technical infrastructure required to power a modern airline booking platform, focusing on real-time availability, modern web-design, and robust data integrity.
 
 ### 3.2 System Overview
-The Airline Booking System is a web-based platform designed to facilitate flight searches, real-time flight selection, and passenger reservations. It emphasizes a premium user experience ("On Cloud Nine") while maintaining a normalized data structure for flight manifests.
+The Airline Booking System is a web-based platform designed to facilitate flight searches, real-time flight selection, and passenger reservations. It emphasizes a premium user experience ("Flight 606") while maintaining a normalized data structure for flight manifests.
 
 ### 3.3 Scope
-* **In-Scope:** Flight searching, flight selection UI, passenger data management, and booking confirmation.
+* **In-Scope:** Flight searching, flight selection UI, passenger data management, Admin Control & Record and booking confirmation.
 * **Out-of-Scope:** Actual credit card or e-wallet processing (mock payments only), real-time radar tracking, and global distribution system (GDS) live sync.
 
 ### 3.4 Technology Stack
@@ -71,12 +71,12 @@ The Airline Booking System is a **standalone web application** designed to provi
 ### 4.4 Operating Environment
 * **Client-side:** Optimized for modern evergreen browsers (Chrome, Firefox, Safari, Edge).
 * **Server-side:** Built on a Node.js runtime environment.
-* **Database:** Utilizing a NoSQL database (MongoDB) to maintain strict data integrity between Users, Passengers, and Bookings.
+* **Database:** MongoDB as the primary data store for the Airline-booking system to leverage its document-oriented architecture. This allows for the seamless storage of multi-faceted booking data within a single record, reducing query latency compared to traditional relational joins. 
 
 ### 4.5 Assumptions and Dependencies
 * **Connectivity:** It is assumed that users have a stable internet connection to access real-time flight data.
 * **Data Source:** Flight schedules and pricing are assumed to be managed via the Admin Dashboard or a local mock JSON server for this iteration.
-* **Mock Payment:** Payment processing is assumed to be handled via a sandbox environment (e.g., Stripe Test Mode). No real financial transactions occur
+* **Mock Payment:** Payment processing is assumed to be handled via internal wallet system (purely internal logic). No real financial transactions occur
 * **Geolocation:** Location-based auto-fill uses the **Browser Geolocation API**(navigator.geolocation)- a built-in, free browser API that prompts the user for permission and returns their GPS coordinates. If the user denies permission, 'From' field defaults to empty and the user has to manually input.
 * **Real-time pricing sync:** Stretch Goal and will only be implemented if the core features are completed first.
 
@@ -289,10 +289,9 @@ A personalized hub for managing the travel lifecycle.
 - **API Interfaces**: 
   - Payment gateway API (e.g., Stripe API) for processing payments.
 - **Hardware Interfaces**: 
-  - None required.
+  - 'Hardware Agnostic' it runs on every device with modern browser installed in their device of choice e.g. smartphone, tablet, laptop, personal computer. 
 - **Software Interfaces**: 
   - MongoDB database: Primary database. Express.js communicates with MongoDB via Mongoose ODM library.
-  - Stripe Sandbox API: Mock payment processing. No real card data is stored or transmitted.
   - Browser Geolocation API(navigator.geolocation): Used optionally to detect the user's nearest airport for search widget auto-fill. Free, built-in and requires user permission.
 
 ## 11. Glossary
