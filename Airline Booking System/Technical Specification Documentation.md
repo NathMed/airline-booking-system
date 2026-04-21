@@ -256,18 +256,20 @@ A personalized hub for managing the travel lifecycle.
 
 ## 9. Data Requirements
 - **Data Models**: 
-  - **User**: { id, firstName, lastName, email, password_hash, phone, createdAt }
-  - **Airline**: { id, name, iataCode, logoUrl }
   - **Aircraft**: { id, airlineId, model, totalSeats }
-  - **Airport**: { id, name, iataCode, city, country, latitude, longitude }
-  - **Flight**: { id, airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice }
+  - **Airline**: { id, name, iataCode, logoUrl }
+  - **Airport**: { id, name, iataCode, city, country }
   - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, bookedAt }
-  - **Passenger**: { id, userId, nationality, dateOfBirth, passportNumber }
   - **BookingPassenger**: { bookingId, passengerId, ticketNumber }
-  - **Payment**: { bookingId, paymentMethod, status, amount, transactionId, paidAt }
+  - **Contact Message**: { id, userId, subject, message, status, submittedAt }
+  - **Flight**: { id, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice }
   - **Itinerary**: { id, userId, name, notes, createdAt }
-  - **Notification**: { userId, bookingId, type, message, isRead, sentAt }
-  - **Seats**: {id, flightId, seatNumber, class, isOccupied, lockedUntil} 
+  - **Itinerary Booking**: { id, itineraryId, bookingId, sortOrder }
+  - **Notification**: { id, userId, bookingId, type, message, isRead, sentAt }
+  - **Passenger**: { id, firstName, lastName, dateOfBirth, passportNumber }
+  - **Payment**: { bookingId, paymentMethod, status, amount, transactionId, paidAt }
+  - **Travelers Profile**: { id, userId, firstName, lastName, dateOfBirth, passportNumber }
+  - **User**: { id, email, password }
 - **Database Requirements**: 
   - Use MongoDB for storing user, product, and order data.
 - **Data Storage and Retrieval**: 
