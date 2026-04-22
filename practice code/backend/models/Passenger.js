@@ -55,10 +55,15 @@ const passengerSchema = new mongoose.Schema({
 		default: false
 	},
 
+	isActive: {
+	  	type: Boolean,
+	  	default: true
+	},
+
 	createdAt: {
 		type: Date,
 		default: Date.now
-	},
+	}
 
 });
 

@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 // ROUTE IMPORTS
 const userRoutes = require("./routes/user");
 const passengerRoutes = require("./routes/passenger");
+const paymentRoutes = require("./routes/payment");
 //const bookingRoutes = require("./routes/booking");
 //const flightRoutes = require("./routes/flights");
 //const bookingPassengerRoutes = require("./routes/bookingPassenger");
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true}));
 // ROUTES
 app.use("/users", userRoutes);
 app.use("/passengers", passengerRoutes);
+app.use("/payments", paymentRoutes);
 //app.use("/bookings", bookingRoutes);
 //app.use("/flights", flightRoutes);
 //app.use("/bookingpassengers", bookingPassengerRoutes);

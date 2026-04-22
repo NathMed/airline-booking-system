@@ -57,3 +57,103 @@ module.exports.createPassenger = (req, res) => {
 		}) 
 		.catch((err) => errorHandler(err, req, res));	
 };
+
+module.exports.getMyPassengers = (req, res) => {
+	return Passenger.find({
+		userId: req.user.id,
+		isProfileSaved: true
+	})
+	.then((result)=> {
+		if (result.length === 0) {
+			return res.status(404).send({ message: "No saved passenger profiles found"});
+		} 
+		return res.status(200).send({
+			message: "Passenger profiles found",
+			passengers: result
+		});
+	})
+		.catch(err=> errorHandler(err,req,res));
+};
+
+module.exports.updatePassenger = (req, res) => {
+	return Passenger.findByIdAndUpdate(req.params.id,
+		{
+			firstName: req.body.firstName,
+			lastName: req.body.lastName,
+			email: req.body.email,
+			nationality: req.body.nationality,
+			passportNumber: req.body.passportNumber,
+			passportExpiry: req.body.passportExpiry,
+			phone: req.body.phone
+		},
+		{ new: true }
+	)
+		.then((result) =>{
+			if(!result) {
+			return res.status(404).send({message: "Passenger not found"});
+		} else {
+			return res.status(200).send({ message: "Passenger profile updated successfully"});
+		}
+	})
+		.catch(err => errorHandler(err, req, res));
+};
+
+
+// ADMIN LEVEL ACCESS
+module.exports.getAllPassengers = (req, res) => {
+	return Passenger.find()
+	.then(result => {
+		if (result.length === 0) {
+			return res.status(404).send({ message: "No passengers found"});
+		}
+		return res.status(200).send({
+			message: "Passengers found",
+			result: result
+		});
+	})
+	.catch(err=> errorHandler(err, req, res));	
+};
+
+module.exports.getPassengerById = (req, res) => {
+	return Passenger.findById(req.params.id)
+	.then(result => {
+		if (!result) {
+			return res.status(404).send({ message: "No passenger found"});
+		}
+		return res.status(200).send({
+			message: "Passenger found",
+			result: result
+		});
+	})
+	.catch(err=> errorHandler(err, req, res));
+};
+
+module.exports.activatePassenger = (req, res) => {
+	return Passenger.findByIdAndUpdate(req.params.id,
+		{ isActive: true },
+		{ new: true }
+	)
+		.then((result) =>{
+			if(!result) {
+			return res.status(404).send({message: "Passenger not found"});
+		} else {
+			return res.status(200).send({ message: "Passenger profile reactivated"});
+		}
+	})
+		.catch(err => errorHandler(err, req, res));
+};
+
+module.exports.deactivatePassenger = (req, res) => {
+	return Passenger.findByIdAndUpdate(req.params.id,
+		{ isActive: false },
+		{ new: true }
+	)
+		.then((result) =>{
+			if(!result) {
+			return res.status(404).send({message: "Passenger not found"});
+		} else {
+			return res.status(200).send({ message: "Passenger profile deactivated"});
+		}
+	})
+		.catch(err => errorHandler(err, req, res));
+};
