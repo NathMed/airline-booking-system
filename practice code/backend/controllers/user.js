@@ -32,7 +32,10 @@ module.exports.registerUser = (req, res) => {
 			});
 
 			return newUser.save()
-				.then((result) => res.status(201).send({ message: "User registered successfully!"}))
+				.then((result) => res.status(201).send({ 
+					message: "User registered successfully!",
+					result: result
+				}))
 			})
 			.catch(err => errorHandler(err, req, res));
 };
@@ -90,7 +93,10 @@ module.exports.updateProfile= (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "User not found"});
 		} else {
-			return res.status(200).send({ message: "User profile updated successfully"});
+			return res.status(200).send({ 
+				message: "User profile updated successfully",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -110,7 +116,10 @@ module.exports.updateEmail = (req, res) => {
 			if (!result) {
 				return res.status(404).send({ message: "User not found"});
 			} else {
-				return res.status(200).send({ message: "Email updated successfully"});
+				return res.status(200).send({ 
+					message: "Email updated successfully",
+					result: result
+				});
 			}
 		})
 		.catch((err) => errorHandler(err, req, res));
@@ -191,7 +200,10 @@ module.exports.updateUserAsAdmin= (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "User not found"});
 		} else {
-			return res.status(200).send({ message: "User profile updated successfully"});
+			return res.status(200).send({ 
+				message: "User profile updated successfully",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -206,7 +218,10 @@ module.exports.deactivateUserAsAdmin= (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "User not found"});
 		} else {
-			return res.status(200).send({ message: "User profile deactivated"});
+			return res.status(200).send({ 
+				message: "User profile deactivated",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -219,9 +234,12 @@ module.exports.activateUserAsAdmin= (req, res) => {
 	)
 		.then((result) =>{
 			if(!result) {
-			return res.status(404).send({message: "User not found"});
+			return res.status(404).send({ message: "User not found"});
 		} else {
-			return res.status(200).send({ message: "User profile reactivated"});
+			return res.status(200).send({ 
+				message: "User profile reactivated",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));

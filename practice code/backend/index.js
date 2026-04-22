@@ -6,11 +6,15 @@ const mongoose = require("mongoose");
 
 // ROUTE IMPORTS
 const userRoutes = require("./routes/user");
+const aircraftRoutes = require("./routes/aircraft");
+const airlineRoutes = require("./routes/airline");
+const airportRoutes = require("./routes/airport");
+const bookingRoutes = require("./routes/booking");
+const bookingPassengerRoutes = require("./routes/bookingPassenger");
+const flightRoutes = require("./routes/flight");
 const passengerRoutes = require("./routes/passenger");
 const paymentRoutes = require("./routes/payment");
-//const bookingRoutes = require("./routes/booking");
-const flightRoutes = require("./routes/flight");
-//const bookingPassengerRoutes = require("./routes/bookingPassenger");
+
 
 // APP INITIALIZATION 
 const app = express();
@@ -27,11 +31,18 @@ app.use(express.urlencoded({ extended: true}));
 
 // ROUTES
 app.use("/users", userRoutes);
+app.use("/aircrafts", aircraftRoutes);
+app.use("/airlines", airlineRoutes);
+app.use("/airports", airportRoutes);
+app.use("/bookings", bookingRoutes);
+app.use("/bookingpassengers", bookingPassengerRoutes);
+app.use("/flights", flightRoutes);
 app.use("/passengers", passengerRoutes);
 app.use("/payments", paymentRoutes);
-//app.use("/bookings", bookingRoutes);
-app.use("/flights", flightRoutes);
-//app.use("/bookingpassengers", bookingPassengerRoutes);
+
+
+
+
 
 // SERVER START
 if(require.main === module) {

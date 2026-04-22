@@ -52,7 +52,10 @@ module.exports.createPassenger = (req, res) => {
 			});
 
 		return newPassenger.save()
-		.then((result) => res.status(201).send({ message: "Passenger created successfully"}))
+		.then((result) => res.status(201).send({ 
+			message: "Passenger created successfully",
+			result: result
+		}))
 		.catch((err) => errorHandler(err, req, res));	
 		}) 
 		.catch((err) => errorHandler(err, req, res));	
@@ -92,7 +95,10 @@ module.exports.updatePassenger = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Passenger not found"});
 		} else {
-			return res.status(200).send({ message: "Passenger profile updated successfully"});
+			return res.status(200).send({ 
+				message: "Passenger profile updated successfully",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -137,7 +143,10 @@ module.exports.activatePassenger = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Passenger not found"});
 		} else {
-			return res.status(200).send({ message: "Passenger profile reactivated"});
+			return res.status(200).send({ 
+				message: "Passenger profile reactivated",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -152,7 +161,10 @@ module.exports.deactivatePassenger = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Passenger not found"});
 		} else {
-			return res.status(200).send({ message: "Passenger profile deactivated"});
+			return res.status(200).send({ 
+				message: "Passenger profile deactivated",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));

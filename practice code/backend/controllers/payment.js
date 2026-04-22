@@ -137,7 +137,10 @@ module.exports.updatePaymentStatus = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Payment not found"});
 		} else {
-			return res.status(200).send({ message: "Status updated successfully"});
+			return res.status(200).send({ 
+				message: "Status updated successfully",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));

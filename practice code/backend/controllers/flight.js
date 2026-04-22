@@ -88,7 +88,10 @@ module.exports.createFlight = (req, res) => {
 		});
 
 		return newFlight.save()
-		.then((result) => res.status(201).send({ message: "Flight created successfully"}))
+		.then((result) => res.status(201).send({ 
+			message: "Flight created successfully",
+			result: result
+		}))
 		.catch(err => errorHandler(err, req, res));
 	})
 	.catch(err => errorHandler(err, req, res));
@@ -129,7 +132,10 @@ module.exports.updateFlight = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Flight not found"});
 		} else {
-			return res.status(200).send({ message: "Flight information updated successfully"});
+			return res.status(200).send({ 
+				message: "Flight information updated successfully",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -144,7 +150,10 @@ module.exports.deactivateFlight = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Flight not found"});
 		} else {
-			return res.status(200).send({ message: "Flight deactivated"});
+			return res.status(200).send({ 
+				message: "Flight deactivated",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
@@ -159,7 +168,10 @@ module.exports.reactivateFlight = (req, res) => {
 			if(!result) {
 			return res.status(404).send({message: "Flight not found"});
 		} else {
-			return res.status(200).send({ message: "Flight reactivated"});
+			return res.status(200).send({ 
+				message: "Flight reactivated",
+				result: result
+			});
 		}
 	})
 		.catch(err => errorHandler(err, req, res));
