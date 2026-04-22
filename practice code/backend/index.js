@@ -9,7 +9,7 @@ const userRoutes = require("./routes/user");
 const passengerRoutes = require("./routes/passenger");
 const paymentRoutes = require("./routes/payment");
 //const bookingRoutes = require("./routes/booking");
-//const flightRoutes = require("./routes/flights");
+const flightRoutes = require("./routes/flight");
 //const bookingPassengerRoutes = require("./routes/bookingPassenger");
 
 // APP INITIALIZATION 
@@ -30,7 +30,7 @@ app.use("/users", userRoutes);
 app.use("/passengers", passengerRoutes);
 app.use("/payments", paymentRoutes);
 //app.use("/bookings", bookingRoutes);
-//app.use("/flights", flightRoutes);
+app.use("/flights", flightRoutes);
 //app.use("/bookingpassengers", bookingPassengerRoutes);
 
 // SERVER START

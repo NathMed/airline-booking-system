@@ -34,7 +34,7 @@ module.exports.registerUser = (req, res) => {
 			return newUser.save()
 				.then((result) => res.status(201).send({ message: "User registered successfully!"}))
 			})
-			.catch((err) => errorHandler(err, req, res));
+			.catch(err => errorHandler(err, req, res));
 };
 
 module.exports.loginUser =(req, res) => {
