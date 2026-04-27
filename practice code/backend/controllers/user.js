@@ -6,54 +6,53 @@ const auth = require("../auth");
 // USER LEVEL ACCESS
 
 module.exports.registerUser = (req, res) => {
-	const { firstName, lastName, email, password, confirmPassword, phone, gender } = req.body;
+    const { firstName, lastName, email, password, confirmPassword, phone, gender } = req.body;
 
-	if (!firstName || firstName.trim() === "") {
-		return res.status(400).send({ message: "First name is required" });
-	} 
-	if (!lastName || lastName.trim() === "") {
-		return res.status(400).send({ message: "Last name is required" });
-	}
-	if (!gender) {
-		return res.status(400).send({ message: "Gender is required" });
-	} 
-	if (!email || !email.includes("@")) {
-		return res.status(400).send({ message: "Incorrect email format"});
-	} 
-	if (!password || password.length < 8) {
-		return res.status(400).send({ message: "Password must be at least 8 characters"})
-	} 
-	if (!confirmPassword || confirmPassword !== password){
-		return res.status(400).send({ message: "Passwords do not match"});
-	} 
-	if (!phone || phone.length !== 11){
-		return res.status(400).send({ message: "Phone number must be 11 digits"})
-	}
-	
+    if (!firstName || firstName.trim() === "") {
+        return res.status(400).send({ message: "First name is required" });
+    }
+    if (!lastName || lastName.trim() === "") {
+        return res.status(400).send({ message: "Last name is required" });
+    }
+    if (!gender) {
+        return res.status(400).send({ message: "Gender is required" });
+    }
+    if (!email || !email.includes("@")) {
+        return res.status(400).send({ message: "Incorrect email format" });
+    }
+    if (!password || password.length < 8) {
+        return res.status(400).send({ message: "Password must be at least 8 characters" });
+    }
+    if (!confirmPassword || confirmPassword !== password) {
+        return res.status(400).send({ message: "Passwords do not match" });
+    }
+    if (!phone || phone.length !== 11) {
+        return res.status(400).send({ message: "Phone number must be 11 digits" });
+    }
 
-	return User.findOne({ email })
-		.then((existingUser) =>{
-			if (existingUser) {
-				return res.status(409).send({ message: "Email already registered"});
-			}
+    return User.findOne({ email })
+        .then((existingUser) => {
+            if (existingUser) {
+                return res.status(409).send({ message: "Email already registered" });
+            }
 
-			const newUser = new User({
-				firstName,
-				lastName,
-				gender,
-				email,
-				password: bcrypt.hashSync(password, 10),
-				phone,
-				isAdmin: false
-			});
+            const newUser = new User({
+                firstName,
+                lastName,
+                gender,
+                email,
+                password: bcrypt.hashSync(password, 10),
+                phone,
+                isAdmin: false
+            });
 
-			return newUser.save()
-				.then((result) => res.status(201).send({ 
-					message: "User registered successfully!",
-					result
-				}))
-			})
-			.catch(err => errorHandler(err, req, res));
+            return newUser.save()
+                .then((result) => res.status(201).send({
+                    message: "User registered successfully!",
+                    result
+                }));
+        })
+        .catch((err) => errorHandler(err, req, res)); 
 };
 
 module.exports.loginUser = (req, res) => {
@@ -62,6 +61,9 @@ module.exports.loginUser = (req, res) => {
 	if (!email || !email.includes("@")) {
 		return res.status(400).send({ message: "Invalid email format"})
 	}
+	 if (!password) {
+        return res.status(400).send({ message: "Password is required" });
+    }
 
 	return User.findOne({ email })
 		.then(result => {

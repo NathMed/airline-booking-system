@@ -33,7 +33,7 @@ module.exports.createPassenger = (req, res) => {
 	}
 	
 
-	return Passenger.findOne({ passportNumber: req.body.passportNumber})
+	return Passenger.findOne({ passportNumber: passportNumber})
 		.then((existingPassenger) =>{
 			if (existingPassenger) {
 				return res.status(409).send({ message: "Passport number already registered"})
@@ -45,7 +45,7 @@ module.exports.createPassenger = (req, res) => {
 				lastName,
 				gender, 
 				dateOfBirth, 
-				email: req.user ? req.user.email : req.body.email, 
+				email: req.user ? req.user.email : email, 
 				nationality, 
 				passportNumber, 
 				passportExpiry, 
