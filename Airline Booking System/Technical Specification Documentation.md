@@ -300,15 +300,15 @@ A personalized hub for managing the travel lifecycle.
 
 ## 9. Data Requirements
 - **Data Models**: 
-  - **User**: { id, firstName, lastName, email, password, phone }
-  - **Airline**: { id, name, iataCode, logoUrl }
-  - **Aircraft**: { id, airlineId, model, totalSeat }
-  - **Airport**: { id, name, iataCode, city, country, latitude, longitude }
-  - **Flight**: { id, airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice }
-  - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, bookedAt }
-  - **Passenger**: { id, userId, firstName, lastName, nationality, dateOfBirth, passportNumber }
-  - **BookingPassenger**: { bookingId, passengerId, ticketNumber }
-  - **Payment**: { bookingId, paymentMethod, status, amount, transactionId, paidAt }
+  - **User**: { id, firstName, lastName, gender, email, password, phone, isAdmin, isActive, createdAt }
+  - **Airline**: { id, name, iataCode, logoUrl,  isActive, createdAt }
+  - **Aircraft**: { id, airlineId, model, totalSeats, isActive, createdAt }
+  - **Airport**: { id, name, iataCode, city, country, isActive, createdAt  }
+  - **Flight**: { id, airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, isActive, createdAt }
+  - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, isActive, bookedAt }
+  - **Passenger**: { id, userId, firstName, lastName, gender, dateOfBirth, email, nationality, passportNumber, passportExpiry, phone, isProfileSaved, isActive, createdAt }
+  - **BookingPassenger**: { bookingId, passengerId, ticketNumber, isActive, createdAt }
+  - **Payment**: { userId, bookingId, paymentMethod, amount, status, transactionId, paidAt }
   - **Itinerary**: { id, userId, name, notes, createdAt }
   - **Notification**: { userId, bookingId, type, message, isRead, sentAt }
 - **Database Requirements**: 
