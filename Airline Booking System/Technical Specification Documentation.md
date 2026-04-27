@@ -34,13 +34,13 @@
 ## 3. Introduction
 
 ### 3.1 Purpose
-To architect a seamless, 'cloud-nine' travel experience. This document details the technical infrastructure required to power a modern airline booking platform, focusing on real-time availability, modern web-design, and robust data integrity.
+To architect a seamless, 'Flight 606' travel experience. This document details the technical infrastructure required to power a modern airline booking platform, focusing on real-time availability, modern web-design, and robust data integrity.
 
 ### 3.2 System Overview
-The Airline Booking System is a web-based platform designed to facilitate flight searches, real-time flight selection, and passenger reservations. It emphasizes a premium user experience ("On Cloud Nine") while maintaining a normalized data structure for flight manifests.
+The Airline Booking System is a web-based platform designed to facilitate flight searches, real-time flight selection, and passenger reservations. It emphasizes a premium user experience ("Flight 606") while maintaining a normalized data structure for flight manifests.
 
 ### 3.3 Scope
-* **In-Scope:** Flight searching, flight selection UI, passenger data management, and booking confirmation.
+* **In-Scope:** Flight searching, flight selection UI, passenger data management, Admin Control & Record and booking confirmation.
 * **Out-of-Scope:** Actual credit card or e-wallet processing (mock payments only), real-time radar tracking, and global distribution system (GDS) live sync.
 
 ### 3.4 Technology Stack
@@ -71,12 +71,14 @@ The Airline Booking System is a **standalone web application** designed to provi
 ### 4.4 Operating Environment
 * **Client-side:** Optimized for modern evergreen browsers (Chrome, Firefox, Safari, Edge).
 * **Server-side:** Built on a Node.js runtime environment.
-* **Database:** Utilizing a relational database (e.g., PostgreSQL) to maintain strict data integrity between Users, Passengers, and Bookings.
+* **Database:** MongoDB as the primary data store for the Airline-booking system to leverage its document-oriented architecture. This allows for the seamless storage of multi-faceted booking data within a single record, reducing query latency compared to traditional relational joins. 
 
 ### 4.5 Assumptions and Dependencies
 * **Connectivity:** It is assumed that users have a stable internet connection to access real-time flight data.
 * **Data Source:** Flight schedules and pricing are assumed to be managed via the Admin Dashboard or a local mock JSON server for this iteration.
-* **Mock Services:** Payment processing is assumed to be handled via a sandbox environment (e.g., Stripe Test Mode), and location-based features depend on browser-level Geolocation API permissions.
+* **Mock Payment:** Payment processing is assumed to be handled via internal wallet system (purely internal logic). No real financial transactions occur
+* **Geolocation:** Location-based auto-fill uses the **Browser Geolocation API**(navigator.geolocation)- a built-in, free browser API that prompts the user for permission and returns their GPS coordinates. If the user denies permission, 'From' field defaults to empty and the user has to manually input.
+* **Real-time pricing sync:** Stretch Goal and will only be implemented if the core features are completed first.
 
 ## 5. Visual Mockup Reference 
 > [!IMPORTANT]
@@ -105,6 +107,15 @@ The Airline Booking System is a **standalone web application** designed to provi
 | Discover / Editorial Cards | Highlights news, app promos, and destination features. | 3-column card grid, thumbnail images, short descriptions, inline text CTAs (Read More, Download Now, Explore More). | 
 | Cheap Flights / Deals Section | Algorithmically curated low-fare suggestions. |  low-fare suggestions. 2-column card grid, destination image, city name, date range, flight duration, price. |
 | Footer | Site-wide navigation and brand links. |  Multi-column link groups (Other Offerings, About Us, Corporate Travel, AskMH), newsletter Subscribe CTA, social media icons, legal links. |
+| Passenger Details Page | Collects legal traveler information for all passengers on the booking. | Name, birthdate, gender, nationality, passport, expiry date, contact info fields. |
+| Payment Page | Mock payment entry form. No real transactions. | Card number, expiry CVV fields. Stripe Test Mode badge. |
+| Search Results Page | Displays flights matching the user's query with filter controls. | Flight result cards (airline, time, duration, stops, price), filter sidebar(price,time, stops). |
+| Booking Confirmation | Success screen displayed after a booking is finalized. | Unique PNR code, flight summary, passenger list, digital boarding pass preview with QR code. |
+| Digital Boarding Pass | Mobile-friendly standalone view of a confirmed flight ticket. | Flight number, route, passenger name, seat number, departure time, QR code for gate scanning. |
+| User Dashboard | Personalized hub for authenticated users to manage their travels. | Upcoming trips, past booking history, boarding pass access, loyalty points(stretch goal). |
+| Admin Dashboard | Secure management interface for Flight Administrators. | Flight schedule table, add/edit/remove flight controls, seat availability management, passenger manifest export. |
+| Login/Register Page | User authentication screens. | Email and password fields, Register and Login CTAs, guest checkout option. | 
+
 
 ### 5.2 UI Logic Requirements
 - **Hero & Navigation Logic**: 
@@ -118,8 +129,8 @@ The Airline Booking System is a **standalone web application** designed to provi
     - **Search Validation** The "Book now!" button remains disabled or returns an animation if the "From" and "To" fields are identical or if the date field is null.
 
 - **Traveling From Your Location**:
-  - **IP-Based Geolocation**: On page load, the system requests the user's location. If granted, the "Traveling from your location" text updates to "Flights from Manila" (or current city), and the "From" input in the search widget pre-populates with the nearest airport code (e.g., MNL).
-  - **Real-time Pricing Sync**: The price labels (e.g., $₱ 6,999$) should pull from a min_price variable in your Flights table. If a user changes their location, these cards should trigger a "shimmer" loading effect and refresh with new data.
+  - **Geolocation**: On page load, the system calls navigator.geolocation.getCurrentPosition()- a free, built-in Browser API. If the user grants permission, the returned coordinates are matched to the nearest airport IATA code(e.g.,MNL for Manila) using a local airport lookup table. The 'From' input in the search widget is then pre-populated automatically. If the user denies location permission, the 'From' field remains empty and the user fills it manually.
+  - **Real-time Pricing Sync(Stretch Goal)**: The price labels (e.g., $₱ 6,999$) should pull from a min_price variable in your Flights table. If a user changes their location, these cards should trigger a "shimmer" loading effect and refresh with new data.
 
 - **Card Interaction & Animation**:
   - **Destination Card Hover**: On :hover, the destination image should scale by $1.05\times$ within its container (zoom effect) while the "Rich Charcoal" text on the right remains static. This provides tactile feedback without moving the text.
@@ -130,7 +141,7 @@ The Airline Booking System is a **standalone web application** designed to provi
 ### 6.1 Smart Flight Search Engine
 The core of the application, designed to handle complex travel queries with a focus on speed and accuracy.
     - **Multi-Type Routing**: "One-Way", "Multi-City", and "Round-trip"
-    - **Geolocation-Aware**: Automatically detects the user's nearest airport (e.g. NAIA for based in Manila users) to pre-fill the "from" field.
+    - **Geolocation-Aware**: Automatically pre-fills the "From" field with the user's nearest airport using navigator.geolocation. Requires user permission. Falls back to manual input if denied.
     - **Dynamic Filtering**: Allows users to narrow results by price range, departure time, and number of stops without a full page reload.
 ### 6.2 Multi-Passenger Booking Management
 Recognizing the relationship between Users and Passengers, the system allows for flexible group bookings.
@@ -287,16 +298,20 @@ A personalized hub for managing the travel lifecycle.
 
 ## 8. Non-Functional Requirements
 - **Performance**: 
-  - The application should load pages within 2 seconds.
+  - Initial page load: under 3 seconds. Search results API response: under 2 seconds. Seat map render: under 1 second after flight selection.
 - **Security**: 
-  - Passwords should be hashed and stored securely.
-  - All transactions should be encrypted using HTTPS.
+  - Passwords should be hashed using bcrypt(min. 10 salt rounds). All HTTP traffic served over HTTPS. API routes requiring authentication protected by JWT middleware. Form inputs validated both client-side and server-side to prevent injection.  
 - **Usability**: 
-  - The application should be easy to navigate with a clean user interface.
+  - Core booking flow completable in 5 steps or less. All error messages written in plain language with no error codes shown to users.
+- **Responsiveness**:  
+  - Tested and functional on desktop, tablet and mobile phones. All layouts built using Bootstrap 5's responsive grid system.
 - **Reliability**: 
-  - The application should have 99.9% uptime.
+  - All API routes return structured JSON error responses. MongoDB connection errors are caught and return a user-friendly 503 message. Target uptime: 99% during the project demo period.
 - **Supportability**: 
   - The code should be well-documented and maintainable.
+- **Compatibility**: 
+  - Tested on Chrome, Firefox, Edge and Safari. No browser-specific layout bugs on any supported screen size.
+  
 
 ## 9. Data Requirements
 - **Data Models**: 
@@ -311,6 +326,7 @@ A personalized hub for managing the travel lifecycle.
   - **Payment**: { userId, bookingId, paymentMethod, amount, status, transactionId, paidAt }
   - **Itinerary**: { id, userId, name, notes, createdAt }
   - **Notification**: { userId, bookingId, type, message, isRead, sentAt }
+  - **Seats**: {id, flightId, seatNumber, class, isOccupied, lockedUntil} 
 - **Database Requirements**: 
   - Use MongoDB for storing user, product, and order data.
 - **Data Storage and Retrieval**: 
@@ -325,13 +341,17 @@ A personalized hub for managing the travel lifecycle.
   - Payment page
   - Booking Confirmation page
   - My Trips / Itinerary page
+  - Seat Selection Page
+  - Admin Dashboard
+  - Digital Boarding Pass
+
 - **API Interfaces**: 
   - Payment gateway API (e.g., Stripe API) for processing payments.
 - **Hardware Interfaces**: 
-  - None required.
+  - 'Hardware Agnostic' it runs on every device with modern browser installed in their device of choice e.g. smartphone, tablet, laptop, personal computer. 
 - **Software Interfaces**: 
-  - Interact with the MongoDB database.
-  - Connect with the payment gateway for transactions.
+  - MongoDB database: Primary database. Express.js communicates with MongoDB via Mongoose ODM library.
+  - Browser Geolocation API(navigator.geolocation): Used optionally to detect the user's nearest airport for search widget auto-fill. Free, built-in and requires user permission.
 
 ## 11. Glossary
 - **SKU**: Stock Keeping Unit
