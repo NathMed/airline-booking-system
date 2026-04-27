@@ -17,6 +17,12 @@ const passengerSchema = new mongoose.Schema({
 		required: [true, "Last Name is Required"]
 	},
 
+	gender: {
+	    type: String,
+	    required: [true, "Gender is Required"],
+	    enum: ["Male", "Female"]
+	},
+
 	dateOfBirth: {
 		type: Date,
 		required: [true, "Date of birth is Required"]

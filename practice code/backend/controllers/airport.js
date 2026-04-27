@@ -6,11 +6,11 @@ module.exports.getAirportById = (req, res) => {
 	return Airport.findById(req.params.id)
 	.then(result => {
 		if (!result) {
-			return res.status(404).send({ message: "No airport is found"});
+			return res.status(404).send({ message: "No airport found"});
 		}
 		return res.status(200).send({
 			message: "Airport found",
-			result: result
+			result
 		});
 	})
 	.catch(err=> errorHandler(err, req, res));  
@@ -20,11 +20,11 @@ module.exports.getAllAirports = (req, res) => {
 	return Airport.find()
 	.then(result => {
 		if (result.length === 0) {
-			return res.status(404).send({ message: "No airport found"});
+			return res.status(404).send({ message: "No airports found"});
 		}
 		return res.status(200).send({
-			message: "Airport found",
-			result: result
+			message: "Airports found",
+			result
 		});
 	})
 	.catch(err=> errorHandler(err, req, res));
@@ -41,10 +41,7 @@ module.exports.createAirport = (req, res) => {
     }
 
     return Airport.findOne({
-    	$or: [
-    		{name: name},
-    		{iataCode: iataCode}
-    	]
+    	$or: [{ name },	{ iataCode }]
     })
 
     .then((existingAirport)=>{
@@ -53,11 +50,11 @@ module.exports.createAirport = (req, res) => {
             return res.status(409).send({ message: `${conflict} is already registered` });
     	}
 
-    	let newAirport = new Airport({
-    		name: name,
-    		iataCode: iataCode,
-    		city: city,
-    		country: country,
+    	const newAirport = new Airport({
+    		name,
+    		iataCode,
+    		city,
+    		country,
     		isActive: true
     	});
 
@@ -65,7 +62,7 @@ module.exports.createAirport = (req, res) => {
             .then((result) => {
                 return res.status(201).send({ 
                     message: "Airport registered successfully",
-                    result: result 
+                    result 
                 });
             });
     })
@@ -73,37 +70,47 @@ module.exports.createAirport = (req, res) => {
 };
 
 module.exports.deactivateAirport = (req, res) => {
-	return Airport.findByIdAndUpdate(req.params.id,
-		{ isActive: false },
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({ message: "Airport not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Airport is deactivated",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    return Airport.findById(req.params.id) 
+        .then(airport => {
+            if (!airport) {
+                return res.status(404).send({ message: "Airport not found" });
+            }
+            if (!airport.isActive) { 
+                return res.status(400).send({ message: "Airport is already deactivated" });
+            }
+
+            return Airport.findByIdAndUpdate(
+                req.params.id,
+                { isActive: false },
+                { new: true }
+            )
+                .then(result => res.status(200).send({ 
+                    message: "Airport deactivated successfully", 
+                    result 
+                }));
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 module.exports.reactivateAirport = (req, res) => {
-	return Airport.findByIdAndUpdate(req.params.id,
-		{ isActive: true },
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({ message: "Airport not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Airport is reactivated",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    return Airport.findById(req.params.id) 
+        .then(airport => {
+            if (!airport) {
+                return res.status(404).send({ message: "Airport not found" });
+            }
+            if (airport.isActive) { 
+                return res.status(400).send({ message: "Airport is already active" });
+            }
+
+            return Airport.findByIdAndUpdate(
+                req.params.id,
+                { isActive: true },
+                { new: true }
+            )
+                .then(result => res.status(200).send({ 
+                    message: "Airport reactivated successfully", 
+                    result 
+                }));
+        })
+        .catch(err => errorHandler(err, req, res));
 };

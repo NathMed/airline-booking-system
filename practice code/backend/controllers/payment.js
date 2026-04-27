@@ -1,67 +1,58 @@
 const Payment = require("../models/Payment");
+const Booking = require("../models/Booking");
 const { errorHandler } = require("../auth");
-const jwt = require("jsonwebtoken");
+
 
 // USER LEVEL ACCESS
 
 module.exports.createPayment = (req, res) => {
-	const token = req.headers.authorization;
-	  if (token) {
-	    try {
-	      const cleanToken = token.slice(7);
-	      req.user = jwt.verify(cleanToken, process.env.JWT_SECRET_KEY);
-	    } catch (err) {
-	      req.user = null;
-	    }
-	  }
+	const { bookingId, paymentMethod, amount } = req.body;
 
-	if (!req.body.bookingId) {
+	if (!bookingId) {
 		return res.status(400).send({ message: "Booking ID is required"});
-	} else if (!req.body.paymentMethod) {
+	} 
+	if (!paymentMethod) {
 		return res.status(400).send({ message: "Please choose your preferred payment method"});
-	} else if (!req.body.amount) {
+	} 
+	if (!amount) {
 		return res.status(400).send({ message: "Amount input is required"});
 	}
 
-	return Payment.findOne({ bookingId: req.body.bookingId })
-	.then((existingPayment)=>{
-		if (existingPayment) {
-			return res.status(409).send({ message: "Payment already exists for this booking"});
-		}
+	return Booking.findById(bookingId)
+	        .then((booking) => {
+	            if (!booking) {
+	                return res.status(404).send({ message: "Booking not found" });
+	            }
 
-		let newPayment = new Payment({
-			userId: req.user ? req.user.id : null,
-			bookingId: req.body.bookingId,
-			paymentMethod: req.body.paymentMethod,
-			amount: req.body.amount,
-			status: "pending",
-			transactionId: "TXN-" + Date.now(),
-			paidAt: null
-		});
+	            return Payment.findOne({ bookingId })
+	                .then((existingPayment) => {
+	                    if (existingPayment) {
+	                        return res.status(409).send({ message: "Payment already exists for this booking" });
+	                    }
 
-	return newPayment.save()
-	.then((result) => res.status(201).send({ 
-		message: "Payment created successfully",
-		transactionId: result.transactionId,
-		status: result.status
-	}))
-	.catch((err) => errorHandler(err, req, res));	
-	})
-	.catch((err) => errorHandler(err, req, res));
-};
+	                    const newPayment = new Payment({
+	                        userId: req.user ? req.user.id : null,
+	                        bookingId,
+	                        paymentMethod,
+	                        amount,
+	                        status: "pending",
+	                        transactionId: "TXN-" + Date.now(),
+	                        paidAt: null
+	                    });
+
+	                    return newPayment.save()
+	                        .then((result) => res.status(201).send({
+	                            message: "Payment created successfully",
+	                            transactionId: result.transactionId,
+	                            status: result.status
+	                        }));
+	                });
+	        })
+	        .catch((err) => errorHandler(err, req, res)); 
+	};
 
 module.exports.getMyPayments = (req, res) => {
-	const token = req.headers.authorization;
-	  if (token) {
-	    try {
-	      const cleanToken = token.slice(7);
-	      req.user = jwt.verify(cleanToken, process.env.JWT_SECRET_KEY);
-	    } catch (err) {
-	      req.user = null;
-	    }
-	  }
-
-	  // If registered user
+	// If registered user
 	  if (req.user) {
 	    return Payment.find({ userId: req.user.id })
 	      .then((result) => {
@@ -119,29 +110,41 @@ module.exports.getPaymentById = (req, res) => {
 		}
 		return res.status(200).send({
 			message: "Payment found",
-			result: result
+			result
 		});
 	})
 	.catch(err=> errorHandler(err, req, res));
 };
 
 module.exports.updatePaymentStatus = (req, res) => {
-	return Payment.findByIdAndUpdate(req.params.id,
-		{
-			status: req.body.status,
-			paidAt: req.body.status === "paid" ? Date.now() : null
-		},
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({message: "Payment not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Status updated successfully",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    const { status } = req.body;
+
+    const validStatuses = ["pending", "paid", "failed", "refunded"];
+    if (!status || !validStatuses.includes(status)) {
+        return res.status(400).send({ message: `Status must be one of: ${validStatuses.join(", ")}` });
+    }
+
+    return Payment.findById(req.params.id)
+        .then((payment) => {
+            if (!payment) {
+                return res.status(404).send({ message: "Payment not found" });
+            }
+            if (payment.status === status) {
+                return res.status(400).send({ message: `Payment is already marked as ${status}` });
+            }
+
+            return Payment.findByIdAndUpdate(
+                req.params.id,
+                {
+                    status,
+                    paidAt: status === "paid" ? Date.now() : null
+                },
+                { new: true }
+            )
+                .then((result) => res.status(200).send({
+                    message: "Status updated successfully",
+                    result  
+                }));
+        })
+        .catch((err) => errorHandler(err, req, res));
 };

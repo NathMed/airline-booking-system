@@ -5,9 +5,9 @@ const router = express.Router();
 
 // USER LEVEL ACCESS
 
-router.post("/create-booking-passenger", bookingPassengerController.createBookingPassenger);
+router.post("/create-booking-passenger", verify, bookingPassengerController.createBookingPassenger);
 
-router.get("/get-booking-booking-passenger/:bookingId", bookingPassengerController.getBookingPassengerByBooking);
+router.get("/get-booking-booking-passengers/:bookingId", bookingPassengerController.getBookingPassengerByBooking);
 
 
 
@@ -16,6 +16,7 @@ router.get("/get-booking-booking-passenger/:bookingId", bookingPassengerControll
 router.get("/get-all-booking-passengers", verify, verifyAdmin, bookingPassengerController.getAllBookingPassengers);
 
 router.patch("/deactivate-booking-passenger/:id", verify, verifyAdmin, bookingPassengerController.deactivateBookingPassenger);
+
 router.patch("/reactivate-booking-passenger/:id", verify, verifyAdmin, bookingPassengerController.reactivateBookingPassenger);
 
 

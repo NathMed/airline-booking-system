@@ -42,6 +42,19 @@ module.exports.verify = (req, res, next) => {
 	}
 }
 
+module.exports.verifyOptional = (req, res, next) => {
+    const token = req.headers.authorization;
+    if (token) {
+        try {
+            const cleanToken = token.slice(7);
+            req.user = jwt.verify(cleanToken, process.env.JWT_SECRET_KEY);
+        } catch (err) {
+            req.user = null; 
+        }
+    }
+    next();
+};
+
 
 module.exports.verifyAdmin = (req, res, next) => {
 	if (req.user.isAdmin) {

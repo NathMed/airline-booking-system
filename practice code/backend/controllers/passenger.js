@@ -1,36 +1,37 @@
 const Passenger = require("../models/Passenger");
 const { errorHandler } = require("../auth");
-const jwt = require("jsonwebtoken");
 
-// USER/GUEST ACCESS
 module.exports.createPassenger = (req, res) => {
-	const token = req.headers.authorization;
-	if (token) {
-		try {
-			const cleanToken = token.slice(7);
-      		req.user = jwt.verify(cleanToken, process.env.JWT_SECRET_KEY);
-		} catch (err){
-			req.user = null;
-		}
-	}
+	const { firstName, lastName, dateOfBirth, email, nationality, passportNumber, passportExpiry, phone, gender } = req.body;
 
-	if (!req.body.firstName || req.body.firstName.trim() === "") {
+	if (!firstName || firstName.trim() === "") {
 		return res.status(400).send({ message: "First name is required" });
-	} else if (!req.body.lastName || req.body.lastName.trim() === "") {
+	} 
+	if (!lastName || lastName.trim() === "") {
 		return res.status(400).send({ message: "Last name is required" });
-	} else if (!req.body.dateOfBirth) {
+	} 
+	if (!gender) {
+		return res.status(400).send({ message: "Gender is required" });
+	}
+	if (!dateOfBirth) {
 		return res.status(400).send({ message: "Date of Birth is required"});
-	} else if (!req.user && (!req.body.email || !req.body.email.includes("@"))) {
+	} 
+	if (!req.user && (!email || !req.body.email.includes("@"))) {
 		return res.status(400).send({ message: "Incorrect email format"});
-	} else if (!req.body.nationality || req.body.nationality.trim() === "") {
+	} 
+	if (!nationality || nationality.trim() === "") {
 		return res.status(400).send({ message: "Nationality is required"});
-	} else if (!req.body.passportNumber || req.body.passportNumber.trim() === "") {
+	} 
+	if (!passportNumber || passportNumber.trim() === "") {
 		return res.status(400).send({ message: "Passport Number is required"});
-	} else if (!req.body.passportExpiry) {
+	} 
+	if (!passportExpiry) {
 		return res.status(400).send({ message: "Passport Expiry is required"});
-	} else if (!req.body.phone || req.body.phone.length !== 11){
+	} 
+	if (!phone || phone.length !== 11){
 		return res.status(400).send({ message: "Phone number must be 11 digits"})
 	}
+	
 
 	return Passenger.findOne({ passportNumber: req.body.passportNumber})
 		.then((existingPassenger) =>{
@@ -38,26 +39,26 @@ module.exports.createPassenger = (req, res) => {
 				return res.status(409).send({ message: "Passport number already registered"})
 			}
 
-			let newPassenger = new Passenger({
-			userId: req.user ? req.user.id: null,
-			firstName: req.body.firstName, 
-			lastName: req.body.lastName, 
-			dateOfBirth: req.body.dateOfBirth, 
-			email: req.user ? req.user.email: req.body.email, 
-			nationality: req.body.nationality, 
-			passportNumber: req.body.passportNumber, 
-			passportExpiry: req.body.passportExpiry, 
-			phone: req.body.phone,
-			isProfileSaved: req.user ? true : false 
+			const newPassenger = new Passenger({
+				userId: req.user ? req.user.id : null,
+				firstName, 
+				lastName,
+				gender, 
+				dateOfBirth, 
+				email: req.user ? req.user.email : req.body.email, 
+				nationality, 
+				passportNumber, 
+				passportExpiry, 
+				phone,
+				isProfileSaved: req.user ? true : false 
 			});
 
 		return newPassenger.save()
 		.then((result) => res.status(201).send({ 
 			message: "Passenger created successfully",
-			result: result
-		}))
-		.catch((err) => errorHandler(err, req, res));	
-		}) 
+			result
+		}));
+	}) 
 		.catch((err) => errorHandler(err, req, res));	
 };
 
@@ -75,37 +76,95 @@ module.exports.getMyPassengers = (req, res) => {
 			passengers: result
 		});
 	})
-		.catch(err=> errorHandler(err,req,res));
+		.catch(err => errorHandler(err,req,res));
+};
+
+module.exports.getPassengerForGuest = (req, res) => {
+    const { passportNumber } = req.body;
+
+    if (!passportNumber || passportNumber.trim() === "") {
+        return res.status(400).send({ message: "Passport number is required for lookup" });
+    }
+
+    return Passenger.findOne({ passportNumber: passportNumber })
+        .then(passenger => {
+            if (!passenger) {
+                return res.status(404).send({ message: "No passenger found with this passport number" });
+            }
+            if (passenger.userId) {
+                return res.status(403).send({ message: "This profile is linked to an account. Please log in to continue." });
+            }
+            return res.status(200).send({
+                message: "Passenger record retrieved successfully",
+                passenger
+            });
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 module.exports.updatePassenger = (req, res) => {
-	return Passenger.findByIdAndUpdate(req.params.id,
-		{
-			firstName: req.body.firstName,
-			lastName: req.body.lastName,
-			email: req.body.email,
-			nationality: req.body.nationality,
-			passportNumber: req.body.passportNumber,
-			passportExpiry: req.body.passportExpiry,
-			phone: req.body.phone
-		},
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({message: "Passenger not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Passenger profile updated successfully",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+	const { firstName, lastName, gender, email, nationality, passportNumber, passportExpiry, phone } = req.body;
+
+	return Passenger.findById(req.params.id)
+        .then((passenger) => {
+            if (!passenger) {
+                return res.status(404).send({ message: "Passenger not found" });
+            }
+            if (String(passenger.userId) !== req.user.id) {
+                return res.status(403).send({ message: "Unauthorized to update this passenger" });
+            }
+
+            return Passenger.findByIdAndUpdate(
+                req.params.id,
+                { firstName, lastName, email, nationality, passportNumber, passportExpiry, phone, gender },
+                { new: true }
+            )
+            .then((result) => res.status(200).send({
+                message: "Passenger profile updated successfully",
+                result 
+            }));
+        })
+        .catch((err) => errorHandler(err, req, res));
 };
 
+module.exports.updatePassengerAsGuest = (req, res) => {
+    const { passportNumber, firstName, lastName, email, nationality, passportExpiry, phone, gender } = req.body;
 
-// ADMIN LEVEL ACCESS
+    if (!passportNumber) {
+        return res.status(400).send({ message: "Passport number is required to identify the guest profile." });
+    }
+
+    return Passenger.findOneAndUpdate(
+        { 
+            passportNumber: passportNumber, 
+            userId: null 
+        }, 
+        { 
+            firstName, 
+            lastName, 
+            email, 
+            nationality, 
+            passportExpiry, 
+            phone,
+            gender
+        },
+        { new: true }
+    )
+    .then(result => {
+        if (!result) {
+            return res.status(404).send({ 
+                message: "Guest profile not found. Note: Profiles linked to registered accounts cannot be updated here." 
+            });
+        }
+        
+        return res.status(200).send({ 
+            message: "Guest passenger updated successfully", 
+            result 
+        });
+    })
+    .catch(err => errorHandler(err, req, res));
+};	
+
 module.exports.getAllPassengers = (req, res) => {
 	return Passenger.find()
 	.then(result => {
@@ -114,10 +173,10 @@ module.exports.getAllPassengers = (req, res) => {
 		}
 		return res.status(200).send({
 			message: "Passengers found",
-			result: result
+			result
 		});
 	})
-	.catch(err=> errorHandler(err, req, res));	
+	.catch(err => errorHandler(err, req, res));	
 };
 
 module.exports.getPassengerById = (req, res) => {
@@ -128,44 +187,74 @@ module.exports.getPassengerById = (req, res) => {
 		}
 		return res.status(200).send({
 			message: "Passenger found",
-			result: result
+			result
 		});
 	})
-	.catch(err=> errorHandler(err, req, res));
+	.catch(err => errorHandler(err, req, res));
+};
+
+module.exports.adminUpdatePassenger = (req, res) => {
+    const { firstName, lastName, gender, email, nationality, passportNumber, passportExpiry, phone } = req.body;
+
+    return Passenger.findByIdAndUpdate(
+        req.params.id,
+        { firstName, lastName, gender, email, nationality, passportNumber, passportExpiry, phone },
+        { new: true }
+    )
+    .then((result) => {
+        if (!result) {
+            return res.status(404).send({ message: "Passenger not found" });
+        }
+        return res.status(200).send({
+            message: "Passenger profile updated successfully (Admin Action)",
+            result
+        });
+    })
+    .catch((err) => errorHandler(err, req, res));
 };
 
 module.exports.activatePassenger = (req, res) => {
-	return Passenger.findByIdAndUpdate(req.params.id,
-		{ isActive: true },
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({message: "Passenger not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Passenger profile reactivated",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    return Passenger.findById(req.params.id)
+        .then((passenger) => {
+            if (!passenger) {
+                return res.status(404).send({ message: "Passenger not found" });
+            }
+            if (passenger.isActive) {
+                return res.status(400).send({ message: "Passenger profile is already active" });
+            }
+
+            return Passenger.findByIdAndUpdate(
+                req.params.id,
+                { isActive: true },
+                { new: true }
+            )
+            .then((result) => res.status(200).send({
+                message: "Passenger profile reactivated",
+                result  
+            }));
+        })
+        .catch((err) => errorHandler(err, req, res));
 };
 
 module.exports.deactivatePassenger = (req, res) => {
-	return Passenger.findByIdAndUpdate(req.params.id,
-		{ isActive: false },
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({message: "Passenger not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Passenger profile deactivated",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    return Passenger.findById(req.params.id)
+        .then((passenger) => {
+            if (!passenger) {
+                return res.status(404).send({ message: "Passenger not found" });
+            }
+            if (!passenger.isActive) {
+                return res.status(400).send({ message: "Passenger profile is already inactive" });
+            }
+
+            return Passenger.findByIdAndUpdate(
+                req.params.id,
+                { isActive: false },
+                { new: true }
+            )
+            .then((result) => res.status(200).send({
+                message: "Passenger profile deactivated",
+                result  
+            }));
+        })
+        .catch((err) => errorHandler(err, req, res));
 };

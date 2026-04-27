@@ -12,10 +12,7 @@ module.exports.createAirline = (req, res) => {
     } 
 
     return Airline.findOne({ 
-        $or: [
-            { name: name },
-            { iataCode: iataCode }
-        ] 
+        $or: [{ name }, { iataCode }] 
     })
     .then((existingAirline) => {
         if (existingAirline) {
@@ -23,20 +20,18 @@ module.exports.createAirline = (req, res) => {
             return res.status(409).send({ message: `${conflict} is already registered` });
         }
         
-        let newAirline = new Airline({
-            name: name,
-            iataCode: iataCode,
-            logoURL: logoURL,
+        const newAirline = new Airline({
+            name,
+            iataCode,
+            logoURL,
             isActive: true
         });
 
         return newAirline.save()
-            .then((result) => {
-                return res.status(201).send({ 
-                    message: "Airline registered successfully",
-                    result: result 
-                });
-            });
+            .then((result) => res.status(201).send({
+                message: "Airline registered successfully",
+                result
+            }));
     }) 
     .catch(err => errorHandler(err, req, res));
 };
@@ -46,11 +41,11 @@ module.exports.getAirlineById = (req, res) => {
 	return Airline.findById(req.params.id)
 	.then(result => {
 		if (!result) {
-			return res.status(404).send({ message: "No airline is found"});
+			return res.status(404).send({ message: "No airline found"});
 		}
 		return res.status(200).send({
 			message: "Airline found",
-			result: result
+			result
 		});
 	})
 	.catch(err=> errorHandler(err, req, res));  
@@ -64,15 +59,17 @@ module.exports.getAllAirlines = (req, res) => {
 		}
 		return res.status(200).send({
 			message: "Airlines found",
-			result: result
+			result
 		});
 	})
 	.catch(err=> errorHandler(err, req, res));
 };
 
 module.exports.updateAirline = (req, res) => {
-	return Airline.findByIdAndUpdate(req.params.id,
-		{logoURL:req.body.logoURL},
+	const { logoURL } = req.body;
+	return Airline.findByIdAndUpdate(
+		req.params.id,
+		{ logoURL },
 		{ new: true }
 	)
 		.then((result) =>{
@@ -81,7 +78,7 @@ module.exports.updateAirline = (req, res) => {
 		} else {
 			return res.status(200).send({ 
 				message: "Airline updated successfully",
-				result: result
+				result
 			});
 		}
 	})
@@ -89,37 +86,47 @@ module.exports.updateAirline = (req, res) => {
 };
 
 module.exports.deactivateAirline = (req, res) => {
-	return Airline.findByIdAndUpdate(req.params.id,
-		{ isActive: false },
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({ message: "Airline not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Airline is deactivated",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    return Airline.findById(req.params.id)
+        .then((airline) => {
+            if (!airline) {
+                return res.status(404).send({ message: "Airline not found" });
+            } else if (!airline.isActive) {
+                return res.status(400).send({ message: "Airline is already deactivated" });
+            }
+
+            return Airline.findByIdAndUpdate(
+                req.params.id,
+                { isActive: false },
+                { new: true }
+            ).then((result) =>
+                res.status(200).send({
+                    message: "Airline deactivated successfully",
+                    result
+                })
+            );
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 module.exports.reactivateAirline = (req, res) => {
-	return Airline.findByIdAndUpdate(req.params.id,
-		{ isActive: true },
-		{ new: true }
-	)
-		.then((result) =>{
-			if(!result) {
-			return res.status(404).send({ message: "Airline not found"});
-		} else {
-			return res.status(200).send({ 
-				message: "Airline is reactivated",
-				result: result
-			});
-		}
-	})
-		.catch(err => errorHandler(err, req, res));
+    return Airline.findById(req.params.id)
+        .then((airline) => {
+            if (!airline) {
+                return res.status(404).send({ message: "Airline not found" });
+            } else if (airline.isActive) {
+                return res.status(400).send({ message: "Airline is already active" });
+            }
+
+            return Airline.findByIdAndUpdate(
+                req.params.id,
+                { isActive: true },
+                { new: true }
+            ).then((result) =>
+                res.status(200).send({
+                    message: "Airline reactivated successfully",
+                    result
+                })
+            );
+        })
+        .catch(err => errorHandler(err, req, res));
 };
