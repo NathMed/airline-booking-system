@@ -259,14 +259,14 @@ A personalized hub for managing the travel lifecycle.
   - **Aircraft**: { id, airlineId, model, totalSeats, isActive, createdAt }
   - **Airline**: { id, name, iataCode, logoUrl,  isActive, createdAt }
   - **Airport**: { id, name, iataCode, city, country, isActive, createdAt }
-  - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, isActive, bookedAt }
-  - **BookingPassenger**: { bookingId, passengerId, ticketNumber, isActive, createdAt }
+  - **Booking**: { id, userId, guestEmail, contactPhone, flightId, bookingReference, status, totalAmount, isActive, bookedAt }
+  - **BookingPassenger**: { bookingId, passengerId, ticketNumber, seatNumber, isActive, createdAt }
   - **Contact Message**: { id, userId, subject, message, status, submittedAt }
   - **Flight**: { id, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, isActive, createdAt }
   - **Itinerary**: { id, userId, name, notes, createdAt }
   - **Itinerary Booking**: { id, itineraryId, bookingId, sortOrder }
   - **Notification**: { id, userId, bookingId, type, message, isRead, sentAt }
-  - **Passenger**: { id, firstName, lastName, gender, dateOfBirth, seatNumber, passportNumber, passportExpiry, phone, isProfileSaved, isActive, createdAt }
+  - **Passenger**: { id, firstName, lastName, gender, dateOfBirth, passportNumber, passportExpiry, isActive, createdAt }
   - **Payment**: { id, bookingId, paymentMethod, status, amount, transactionId, paidAt }
   - **Travelers Profile**: { id, userId, firstName, lastName, dateOfBirth, passportNumber }
   - **User**: { id, email, password, phone, isAdmin, isActive, createdAt }
