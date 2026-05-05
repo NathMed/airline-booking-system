@@ -77,7 +77,7 @@ The Airline Booking System is a **standalone web application** designed to provi
 * **Connectivity:** It is assumed that users have a stable internet connection to access real-time flight data.
 * **Data Source:** Flight schedules and pricing are assumed to be managed via the Admin Dashboard or a local mock JSON server for this iteration.
 * **Mock Payment:** Payment processing is assumed to be handled via internal wallet system (purely internal logic). No real financial transactions occur
-* **Geolocation:** Location-based auto-fill uses the **Browser Geolocation API**(navigator.geolocation)- a built-in, free browser API that prompts the user for permission and returns their GPS coordinates. If the user denies permission, 'From' field defaults to empty and the user has to manually input.
+* **Mock Geolocation Logic:** For testing and demonstration purposes, the system utilizes a deterministic location-mapping logic rather than a live Browser API. The 'From' field is pre-populated based on a defined Test Profile (e.g., defaulting to 'MNL' for Manila) to ensure consistent UI behavior during the evaluation phase. Manual overrides remain available for all users.
 * **Real-time pricing sync:** Stretch Goal and will only be implemented if the core features are completed first.
 
 ## 5. Visual Mockup Reference 
@@ -92,9 +92,14 @@ The Airline Booking System is a **standalone web application** designed to provi
 - **Color Palette**: 
     - **Primary**: Rich Charcoal *(#1F1F1F)* for navigation and text.
     - **Accent**: Golden Sand *(#D4B982)* for the primary search widgets.
-    - **Action**: Deep Navy *(#1B2B48)* for the CTA button.
+    - **Action**: Slate Grey (#50525F) to maintain readability without the harshness of pure black.
     - **Background**: Champagne Cream *(#F9F6ED)* for the page background
 - **Design Patterns**: High-contrast text overlays, linear gradients for legibility, and back-drop filters for container elements. 
+
+- **Typography**:
+  - **Headings**(h1 - h6): Use the Every City font family (available in Light and Semibold).
+  - **Text Descriptions**: Use the Montserrat font family (available in Semibold and Bold). This is also the font used for Button Text.
+  - **Text Paragraphs**: Use the Inter font family (available in Light and Bold) for standard body copy.
 
 ### 5.1 Key Screen References
 
@@ -129,7 +134,7 @@ The Airline Booking System is a **standalone web application** designed to provi
     - **Search Validation** The "Book now!" button remains disabled or returns an animation if the "From" and "To" fields are identical or if the date field is null.
 
 - **Traveling From Your Location**:
-  - **Geolocation**: On page load, the system calls navigator.geolocation.getCurrentPosition()- a free, built-in Browser API. If the user grants permission, the returned coordinates are matched to the nearest airport IATA code(e.g.,MNL for Manila) using a local airport lookup table. The 'From' input in the search widget is then pre-populated automatically. If the user denies location permission, the 'From' field remains empty and the user fills it manually.
+  - **Mock Geolocation**: Instead of calling navigator.geolocation, the system executes a getMockLocation() function on initialization. This function retrieves a 'currentLocation' variable from a local configuration file. This ensures the 'From' input in the search widget is pre-populated instantly, matching the Design System's requirement for 'Traveling from your location' without latency or permission prompts.
   - **Real-time Pricing Sync(Stretch Goal)**: The price labels (e.g., $₱ 6,999$) should pull from a min_price variable in your Flights table. If a user changes their location, these cards should trigger a "shimmer" loading effect and refresh with new data.
 
 - **Card Interaction & Animation**:
@@ -294,7 +299,7 @@ A personalized hub for managing the travel lifecycle.
   - 'Hardware Agnostic' it runs on every device with modern browser installed in their device of choice e.g. smartphone, tablet, laptop, personal computer. 
 - **Software Interfaces**: 
   - MongoDB database: Primary database. Express.js communicates with MongoDB via Mongoose ODM library.
-  - Browser Geolocation API(navigator.geolocation): Used optionally to detect the user's nearest airport for search widget auto-fill. Free, built-in and requires user permission.
+  - Location Logic Interface: Internal JSON lookup table mapping Test Profiles to IATA airport codes (e.g., Profile_A = 'MNL'). This removes external dependencies on the Browser Geolocation API during the testing cycle.
 
 ## 11. Glossary
 - **API(Application Programming Interface)**: A defined set of rules enabling software components to communicate with each other.
@@ -318,10 +323,13 @@ A personalized hub for managing the travel lifecycle.
   - Figma Mockups- TBD
 
 - **Revision History**: 
-  - **v1.0**: Initial version - April 11, 2026
-  - **v1.1**: First revision - April 14, 2026
-      - Added details on Section 3.4, 5.
-      - Added Feature 7 & 8 on system requirements
-      - Added Glossary terms and Appendices
-  - **v1.2**: Added missing details / improved sections - April 15, 2026
+| Version | Date | Description |
+| :--- | :--- | :--- | :--- |
+| v1.0 | 2026-04-11 | Initial version | 
+| v1.1 | 2026-04-14 | First revision | 
+| v1.1 | 2026-04-14 | Added details on Section 3.4, 5. | 
+| v1.1 | 2026-04-14 | Added Feature 7 & 8 on system requirements | 
+| v1.1 | 2026-04-14 | Added Glossary terms and Appendice | 
+| v1.2 | 2026-04-15 | Added missing details / improved sections | 
+| v1.3 | 2026-05-06 | Swapped live Geolocation API for Mock Location Logic to ensure demo stability; updated Typography and Color Palette to align with v1.0 Design System assets. | 
 
