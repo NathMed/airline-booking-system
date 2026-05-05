@@ -324,7 +324,7 @@ A personalized hub for managing the travel lifecycle.
 
 - **Revision History**: 
 | Version | Date | Description |
-| :--- | :--- | :--- | :--- |
+| :--- | :--- | :--- |
 | v1.0 | 2026-04-11 | Initial version | 
 | v1.1 | 2026-04-14 | First revision | 
 | v1.1 | 2026-04-14 | Added details on Section 3.4, 5. | 
