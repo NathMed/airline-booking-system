@@ -323,13 +323,13 @@ A personalized hub for managing the travel lifecycle.
   - Figma Mockups- TBD
 
 - **Revision History**: 
+
 | Version | Date | Description |
 | :--- | :--- | :--- |
 | v1.0 | 2026-04-11 | Initial version | 
 | v1.1 | 2026-04-14 | First revision | 
-| v1.1 | 2026-04-14 | Added details on Section 3.4, 5. | 
+| v1.1 | 2026-04-14 | Added details on Section 3.4, 5 | 
 | v1.1 | 2026-04-14 | Added Feature 7 & 8 on system requirements | 
 | v1.1 | 2026-04-14 | Added Glossary terms and Appendice | 
 | v1.2 | 2026-04-15 | Added missing details / improved sections | 
 | v1.3 | 2026-05-06 | Swapped live Geolocation API for Mock Location Logic to ensure demo stability; updated Typography and Color Palette to align with v1.0 Design System assets. | 
-
