@@ -315,17 +315,17 @@ A personalized hub for managing the travel lifecycle.
 
 ## 9. Data Requirements
 - **Data Models**: 
-  - **User**: { id, firstName, lastName, gender, email, password, phone, isAdmin, isActive, createdAt }
-  - **Airline**: { id, name, iataCode, logoUrl,  isActive, createdAt }
-  - **Aircraft**: { id, airlineId, model, totalSeats, isActive, createdAt }
-  - **Airport**: { id, name, iataCode, city, country, isActive, createdAt  }
-  - **Flight**: { id, airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, isActive, createdAt }
-  - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, isActive, bookedAt }
-  - **Passenger**: { id, userId, firstName, lastName, gender, dateOfBirth, email, nationality, passportNumber, passportExpiry, phone, isProfileSaved, isActive, createdAt }
-  - **BookingPassenger**: { bookingId, passengerId, ticketNumber, isActive, createdAt }
-  - **Payment**: { userId, bookingId, paymentMethod, amount, status, transactionId, paidAt }
-  - **Itinerary**: { id, userId, name, notes, createdAt }
-  - **Notification**: { userId, bookingId, type, message, isRead, sentAt }
+  - **User**: { id, firstName, lastName, gender, email, password, phone, isAdmin, isActive }
+  - **Airline**: { id, name, iataCode, logoUrl,  isActive }
+  - **Aircraft**: { id, airlineId, model, totalSeats, isActive }
+  - **Airport**: { id, name, iataCode, city, country, isActive }
+  - **Flight**: { id, airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, terminal, isActive }
+  - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, isActive }
+  - **Passenger**: { id, userId, firstName, lastName, gender, dateOfBirth, email, nationality, passportNumber, passportExpiry, phone, isProfileSaved, isActive }
+  - **BookingPassenger**: { id, bookingId, passengerId, ticketNumber, isActive }
+  - **Payment**: { id, userId, bookingId, paymentMethod, amount, status, transactionId, paidAt }
+  - **Itinerary**: { id, userId, guestEmail, bookings: [{ bookingId, type, gate }], isActive }
+  - **Notification**: { id, userId, guestEmail, type, message, referenceId, referenceModel, isRead, emailSent, emailsentAt, isActive }
   - **Seats**: {id, flightId, seatNumber, class, isOccupied, lockedUntil} 
 - **Database Requirements**: 
   - Use MongoDB for storing user, product, and order data.
