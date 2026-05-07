@@ -5,115 +5,190 @@ const { errorHandler } = require("../auth");
 
 // USER LEVEL ACCESS
 
-module.exports.createPayment = (req, res) => {
-	const { bookingId, paymentMethod, amount } = req.body;
+module.exports.createPaymentUser = (req, res) => {
+    const { bookingId, paymentMethod, amount } = req.body;
 
-	if (!bookingId) {
-		return res.status(400).send({ message: "Booking ID is required"});
-	} 
-	if (!paymentMethod) {
-		return res.status(400).send({ message: "Please choose your preferred payment method"});
-	} 
-	if (!amount) {
-		return res.status(400).send({ message: "Amount input is required"});
-	}
+    if (!bookingId) {
+        return res.status(400).send({ message: "Booking ID is required" });
+    }
+    if (!paymentMethod) {
+        return res.status(400).send({ message: "Please choose your preferred payment method" });
+    }
+    if (!amount) {
+        return res.status(400).send({ message: "Amount input is required" });
+    }
 
-	return Booking.findById(bookingId)
-	        .then((booking) => {
-	            if (!booking) {
-	                return res.status(404).send({ message: "Booking not found" });
-	            }
+    return Booking.findOne({ _id: bookingId, userId: req.user.id })
+        .then(booking => {
+            if (!booking) {
+                return res.status(404).send({ message: "Booking not found" });
+            }
+            if (!booking.isActive) {
+                return res.status(400).send({ message: "Cannot pay for an inactive booking" });
+            }
+            if (booking.status === "cancelled") {
+                return res.status(400).send({ message: "Cannot pay for a cancelled booking" });
+            }
 
-	            return Payment.findOne({ bookingId })
-	                .then((existingPayment) => {
-	                    if (existingPayment) {
-	                        return res.status(409).send({ message: "Payment already exists for this booking" });
-	                    }
+            return Payment.findOne({ bookingId })
+                .then(existingPayment => {
+                    if (existingPayment) {
+                        return res.status(409).send({ message: "Payment already exists for this booking" });
+                    }
 
-	                    const newPayment = new Payment({
-	                        userId: req.user ? req.user.id : null,
-	                        bookingId,
-	                        paymentMethod,
-	                        amount,
-	                        status: "pending",
-	                        transactionId: "TXN-" + Date.now(),
-	                        paidAt: null
-	                    });
+                    const newPayment = new Payment({
+                        userId: req.user.id,
+                        bookingId,
+                        paymentMethod,
+                        amount,
+                        status: "pending",
+                        transactionId: "TXN-" + Date.now(),
+                        paidAt: null
+                    });
 
-	                    return newPayment.save()
-	                        .then((result) => res.status(201).send({
-	                            message: "Payment created successfully",
-	                            transactionId: result.transactionId,
-	                            status: result.status
-	                        }));
-	                });
-	        })
-	        .catch((err) => errorHandler(err, req, res)); 
-	};
+                    return newPayment.save()
+                        .then(result => res.status(201).send({
+                            message: "Payment created successfully",
+                            transactionId: result.transactionId,
+                            status: result.status
+                        }));
+                });
+        })
+        .catch(err => errorHandler(err, req, res));
+};
 
-module.exports.getMyPayments = (req, res) => {
-	// If registered user
-	  if (req.user) {
-	    return Payment.find({ userId: req.user.id })
-	      .then((result) => {
-	        if (result.length === 0) {
-	          return res.status(404).send({ message: "No payments found" });
-	        }
-	        return res.status(200).send({
-	          message: "Payments found",
-	          payments: result
-	        });
-	      })
-	      .catch((err) => errorHandler(err, req, res));
-	  }
 
-	  // If guest
-	  if (!req.body.bookingId) {
-	    return res.status(400).send({ message: "Booking ID is required for guest payment lookup" });
-	  }
+module.exports.createPaymentGuest = (req, res) => {
+    const { bookingId, paymentMethod, amount, guestEmail } = req.body;
 
-	  return Payment.find({ bookingId: req.body.bookingId })
-	    .then((result) => {
-	      if (result.length === 0) {
-	        return res.status(404).send({ message: "No payments found" });
-	      }
-	      return res.status(200).send({
-	        message: "Payments found",
-	        payments: result
-	      });
-	    })
-	    .catch((err) => errorHandler(err, req, res));
+    if (!bookingId) {
+        return res.status(400).send({ message: "Booking ID is required" });
+    }
+    if (!paymentMethod) {
+        return res.status(400).send({ message: "Please choose your preferred payment method" });
+    }
+    if (!amount) {
+        return res.status(400).send({ message: "Amount input is required" });
+    }
+    if (!guestEmail || !guestEmail.includes("@")) {
+        return res.status(400).send({ message: "Valid guest email is required" });
+    }
+
+    return Booking.findOne({ _id: bookingId, guestEmail, userId: null })
+        .then(booking => {
+            if (!booking) {
+                return res.status(404).send({ message: "Booking not found" });
+            }
+            if (!booking.isActive) {
+                return res.status(400).send({ message: "Cannot pay for an inactive booking" });
+            }
+            if (booking.status === "cancelled") {
+                return res.status(400).send({ message: "Cannot pay for a cancelled booking" });
+            }
+
+            return Payment.findOne({ bookingId })
+                .then(existingPayment => {
+                    if (existingPayment) {
+                        return res.status(409).send({ message: "Payment already exists for this booking" });
+                    }
+
+                    const newPayment = new Payment({
+                        userId: null,
+                        bookingId,
+                        paymentMethod,
+                        amount,
+                        status: "pending",
+                        transactionId: "TXN-" + Date.now(),
+                        paidAt: null
+                    });
+
+                    return newPayment.save()
+                        .then(result => res.status(201).send({
+                            message: "Payment created successfully",
+                            transactionId: result.transactionId,
+                            status: result.status
+                        }));
+                });
+        })
+        .catch(err => errorHandler(err, req, res));
+};
+
+
+module.exports.getMyPaymentsUser = (req, res) => {
+    return Payment.find({ userId: req.user.id })
+        .then(result => {
+            if (result.length === 0) {
+                return res.status(404).send({ message: "No payments found" });
+            }
+            return res.status(200).send({
+                message: "Payments found",
+                payments: result
+            });
+        })
+        .catch(err => errorHandler(err, req, res));
+};
+
+
+module.exports.getMyPaymentsGuest = (req, res) => {
+    const { bookingId, guestEmail } = req.body;
+
+    if (!bookingId) {
+        return res.status(400).send({ message: "Booking ID is required" });
+    }
+    if (!guestEmail || !guestEmail.includes("@")) {
+        return res.status(400).send({ message: "Valid guest email is required" });
+    }
+
+    // Cross-check: verify the booking actually belongs to this guest
+    return Booking.findOne({ _id: bookingId, guestEmail, userId: null })
+        .then(booking => {
+            if (!booking) {
+                return res.status(404).send({ message: "Booking not found" });
+            }
+
+            return Payment.find({ bookingId })
+                .then(result => {
+                    if (result.length === 0) {
+                        return res.status(404).send({ message: "No payments found" });
+                    }
+                    return res.status(200).send({
+                        message: "Payments found",
+                        payments: result
+                    });
+                });
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 
 // ADMIN LEVEL ACCESS
 
 module.exports.getAllPayments = (req, res) => {
-	return Payment.find()
-	.then((result)=>{
-		if (result.length === 0) {
-			return res.status(404).send({ message: "No payments found"})
-		}
-		return res.status(200).send({ 
-			message: "Payments found",
-			payments: result
-		})
-	})
-	.catch((err) => errorHandler(err, req, res));
+    return Payment.find()
+        .then(result => {
+            if (result.length === 0) {
+                return res.status(404).send({ message: "No payments found" });
+            }
+            return res.status(200).send({
+                message: "Payments found",
+                payments: result
+            });
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 module.exports.getPaymentById = (req, res) => {
-	return Payment.findById(req.params.id)
-	.then(result => {
-		if (!result) {
-			return res.status(404).send({ message: "No payment found"});
-		}
-		return res.status(200).send({
-			message: "Payment found",
-			result
-		});
-	})
-	.catch(err=> errorHandler(err, req, res));
+    return Payment.findById(req.params.id)
+        .then(result => {
+            if (!result) {
+                return res.status(404).send({ message: "No payment found" });
+            }
+            return res.status(200).send({
+                message: "Payment found",
+                result
+            });
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 module.exports.updatePaymentStatus = (req, res) => {
@@ -125,7 +200,7 @@ module.exports.updatePaymentStatus = (req, res) => {
     }
 
     return Payment.findById(req.params.id)
-        .then((payment) => {
+        .then(payment => {
             if (!payment) {
                 return res.status(404).send({ message: "Payment not found" });
             }
@@ -141,10 +216,10 @@ module.exports.updatePaymentStatus = (req, res) => {
                 },
                 { new: true }
             )
-                .then((result) => res.status(200).send({
-                    message: "Status updated successfully",
-                    result  
-                }));
+            .then(result => res.status(200).send({
+                message: "Status updated successfully",
+                result
+            }));
         })
-        .catch((err) => errorHandler(err, req, res));
+        .catch(err => errorHandler(err, req, res));
 };

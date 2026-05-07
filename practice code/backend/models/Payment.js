@@ -33,13 +33,14 @@ const paymentSchema = new mongoose.Schema({
 
 	transactionId: {
 		type: String,
-		default: null
+		default: null,
+		unique: true
 	},
 
 	paidAt: {
 		type: Date,
 		default: null
 	}
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Payment", paymentSchema);

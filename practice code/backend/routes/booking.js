@@ -1,21 +1,26 @@
 const express = require("express");
 const bookingController = require("../controllers/booking");
-const { verify, verifyAdmin, verifyOptional } = require("../auth");
+const { verify, verifyAdmin } = require("../auth");
 const router = express.Router();
 
+
 // USER LEVEL ACCESS
+router.post("/user/create-booking", verify, bookingController.createBookingUser);
 
-router.post("/create-booking", verifyOptional,  bookingController.createBooking);
+router.post("/guest/create-booking", bookingController.createBookingGuest);
 
-router.post("/my-booking", verifyOptional, bookingController.getMyBookings);
+router.get("/user/my-bookings", verify, bookingController.getMyBookingsUser);
+
+router.post("/guest/my-bookings", bookingController.getMyBookingsGuest);
 
 router.get("/get-booking/:bookingReference", bookingController.getBookingByReference);
 
-router.patch("/cancel-booking/:bookingReference", verifyOptional, bookingController.cancelBooking);
+router.patch("/user/cancel-booking/:bookingReference", verify, bookingController.cancelBookingUser);
+
+router.patch("/guest/cancel-booking/:bookingReference", bookingController.cancelBookingGuest);
 
 
 // ADMIN LEVEL ACCESS
-
 router.get("/get-all-bookings", verify, verifyAdmin, bookingController.getAllBookings);
 
 router.patch("/update-booking/:id", verify, verifyAdmin, bookingController.updateBooking);

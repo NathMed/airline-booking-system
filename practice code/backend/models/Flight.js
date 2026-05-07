@@ -39,7 +39,7 @@ const flightSchema = new mongoose.Schema({
 		type: Date,
 		default: null
 	},
-	
+
 	status: {
 		type: String,
 		enum: ["scheduled", "delayed", "on-time", "cancelled", "departed", "arrived"],
@@ -51,17 +51,17 @@ const flightSchema = new mongoose.Schema({
 		required: [true, "Base price is required"],
 		min: [0, "Price must not be negative"]
 	},
-	
+
+	terminal: {
+		type: String,
+		default: null
+	},
+
 	isActive: {
 		type: Boolean,
 		default: true
-	},
-
-	createdAt: {
-		type: Date,
-		default: Date.now
 	}
-	
-});
+
+}, { timestamps: true });
 
 module.exports = mongoose.model("Flight", flightSchema);

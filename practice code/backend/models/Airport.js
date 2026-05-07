@@ -13,8 +13,8 @@ const airportSchema = new mongoose.Schema({
 		required: [true, "3-letter IATA code is required"],
 		unique: true,
 		uppercase: true,
-		minLength: 3,
-		maxLength: 3
+		minlength: 3,
+		maxlength: 3
 	},
 	
 	city:{
@@ -32,14 +32,9 @@ const airportSchema = new mongoose.Schema({
 	isActive:{
 		type: Boolean,
 		default: true
-	},
-
-	createdAt:{
-		type: Date,
-		default: Date.now
 	}
 	
-});
+}, { timestamps: true });
 
 
 module.exports = mongoose.model("Airport", airportSchema);

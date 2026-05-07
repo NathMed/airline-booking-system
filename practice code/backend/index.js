@@ -14,7 +14,8 @@ const bookingPassengerRoutes = require("./routes/bookingPassenger");
 const flightRoutes = require("./routes/flight");
 const passengerRoutes = require("./routes/passenger");
 const paymentRoutes = require("./routes/payment");
-
+const itineraryRoutes = require("./routes/itinerary");
+const notificationRoutes = require("./routes/notification");
 
 // APP INITIALIZATION 
 const app = express();
@@ -39,8 +40,8 @@ app.use("/bookingpassengers", bookingPassengerRoutes);
 app.use("/flights", flightRoutes);
 app.use("/passengers", passengerRoutes);
 app.use("/payments", paymentRoutes);
-
-
+app.use("/itineraries", itineraryRoutes);
+app.use("/notifications", notificationRoutes);
 
 
 

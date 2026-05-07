@@ -21,16 +21,11 @@ const airlineSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-
-	createdAt: {
-		type: Date,
-		default: Date.now
-	},
-
+	
 	isActive: {
 		type: Boolean,
 		default: true
 	}
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model("Airline", airlineSchema);
