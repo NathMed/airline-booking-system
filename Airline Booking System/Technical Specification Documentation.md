@@ -77,7 +77,7 @@ The Airline Booking System is a **standalone web application** designed to provi
 * **Connectivity:** It is assumed that users have a stable internet connection to access real-time flight data.
 * **Data Source:** Flight schedules and pricing are assumed to be managed via the Admin Dashboard or a local mock JSON server for this iteration.
 * **Mock Payment:** Payment processing is assumed to be handled via internal wallet system (purely internal logic). No real financial transactions occur
-* **Geolocation:** Location-based auto-fill uses the **Browser Geolocation API**(navigator.geolocation)- a built-in, free browser API that prompts the user for permission and returns their GPS coordinates. If the user denies permission, 'From' field defaults to empty and the user has to manually input.
+* **Mock Geolocation Logic:** For testing and demonstration purposes, the system utilizes a deterministic location-mapping logic rather than a live Browser API. The 'From' field is pre-populated based on a defined Test Profile (e.g., defaulting to 'MNL' for Manila) to ensure consistent UI behavior during the evaluation phase. Manual overrides remain available for all users.
 * **Real-time pricing sync:** Stretch Goal and will only be implemented if the core features are completed first.
 
 ## 5. Visual Mockup Reference 
@@ -92,9 +92,14 @@ The Airline Booking System is a **standalone web application** designed to provi
 - **Color Palette**: 
     - **Primary**: Rich Charcoal *(#1F1F1F)* for navigation and text.
     - **Accent**: Golden Sand *(#D4B982)* for the primary search widgets.
-    - **Action**: Deep Navy *(#1B2B48)* for the CTA button.
+    - **Action**: Slate Grey (#50525F) to maintain readability without the harshness of pure black.
     - **Background**: Champagne Cream *(#F9F6ED)* for the page background
 - **Design Patterns**: High-contrast text overlays, linear gradients for legibility, and back-drop filters for container elements. 
+
+- **Typography**:
+  - **Headings**(h1 - h6): Use the Every City font family (available in Light and Semibold).
+  - **Text Descriptions**: Use the Montserrat font family (available in Semibold and Bold). This is also the font used for Button Text.
+  - **Text Paragraphs**: Use the Inter font family (available in Light and Bold) for standard body copy.
 
 ### 5.1 Key Screen References
 
@@ -129,7 +134,7 @@ The Airline Booking System is a **standalone web application** designed to provi
     - **Search Validation** The "Book now!" button remains disabled or returns an animation if the "From" and "To" fields are identical or if the date field is null.
 
 - **Traveling From Your Location**:
-  - **Geolocation**: On page load, the system calls navigator.geolocation.getCurrentPosition()- a free, built-in Browser API. If the user grants permission, the returned coordinates are matched to the nearest airport IATA code(e.g.,MNL for Manila) using a local airport lookup table. The 'From' input in the search widget is then pre-populated automatically. If the user denies location permission, the 'From' field remains empty and the user fills it manually.
+  - **Mock Geolocation**: Instead of calling navigator.geolocation, the system executes a getMockLocation() function on initialization. This function retrieves a 'currentLocation' variable from a local configuration file. This ensures the 'From' input in the search widget is pre-populated instantly, matching the Design System's requirement for 'Traveling from your location' without latency or permission prompts.
   - **Real-time Pricing Sync(Stretch Goal)**: The price labels (e.g., $₱ 6,999$) should pull from a min_price variable in your Flights table. If a user changes their location, these cards should trigger a "shimmer" loading effect and refresh with new data.
 
 - **Card Interaction & Animation**:
@@ -157,143 +162,84 @@ A personalized hub for managing the travel lifecycle.
 
 ## 7. Functional Requirements
 ### Use Cases
-- **Use Case 1**: User Auth
-  - **Title**: Register a new user
-  - **Description**: Users can create an account with an email and password.
-  - **Actors**: End User
-  - **Preconditions**: User is on the registration page.
-  - **Postconditions**: User account is created and user is logged in.
-  - **Main Flow**: User enters email and password > User clicks "Register" > System creates account and logs in user.
-  - **Alternate Flows**: User enters invalid email > System shows error.
-
-- **Use Case 2**: Search for Flights
-    - **Title**: Search for available flights
-    - **Description**: Users can look up flights based on their travel intent.
-    - **Actors**: End User / Guest
-    - **Preconditions**: System has a database of active flight schedules.
-    - **Postconditions**: A list of available flights is displayed or a "No results" message is shown.
-    - **Main Flow**: User selects Origin and Destination. > User selects Departure Date. > User clicks "Search." > System displays a list of matching flight results with prices.
-    - **Alternate Flows**: No flights found for selected date > System suggests the next available date.
-
-- **Use Case 3**: Flight Reservation (The "Core")
-    - **Title**: Book a flight ticket
-    - **Description**: A user or guest provides passenger information to secure a seat.
-    - **Actors**: End User / Guest
-    - **Preconditions**: User has selected a specific flight from the search results.
-    - **Postconditions**: A unique Booking Reference (PNR) is generated and stored.
-    - **Main Flow**: User enters Passenger Details (Name, Age, Gender). > System validates data and calculates total price > User confirms booking. > System saves record to the Bookings and Passengers tables.
-    - **Alternate Flows**:
-      - Invalid passenger details > System shows validation errors
-      - Selected flight is full > System prevents booking and suggests other flights
-      - Session timeout during booking > System cancels process and prompts user to restart
-      - System error during save > Booking is not completed and user is notified
-
-- **Use Case 4**: Manage Bookings
-    - **Title**: View/Cancel Reservation
-    - **Description**: Users can see their upcoming trips and cancel if necessary.
-    - **Actors**: Registered End User
-    - **Preconditions**: User is logged in and has at least one existing booking.
-    - **Postconditions**: Booking details are displayed or booking is successfully cancelled.
-    - **Main Flow**: User navigates to "My Trips" > System retrieves bookings linked to their User ID > User views details.
-    - **Alternate Flows**: 
-      - No bookings found > System displays empty state message
-      - Cancellation fails > System shows error message
-
-- **Use Case 5**: Payment
-    - **Title**: Pay for booking
-    - **Description**: User completes payment for a reserved flight.
-    - **Actors**: End User / Guest
-    - **Preconditions**: Booking exists
-    - **Postconditions**: Payment is recorded and booking status is updated.
-    - **Main Flow**: User enters payment details > System processes payment > System confirms booking
-    - **Alternate Flows**:
-      - Payment declined > System shows failure message
-      - Payment timeout > System cancels transaction
-
-- **Use Case 6**: Receive Notifications
-    - **Title**: Receive booking updates
-    - **Description**: Users receive notifications regarding booking confirmations, cancellations, or flight updates.
-    - **Actors**: Registered End User
-    - **Preconditions**: User has an existing booking.
-    - **Postconditions**: Notification is stored and displayed to the user.
-    - **Main Flow**: System detects booking update > System generates notification > Notification is sent and stored > User views notification.
-    - **Alternate Flows**: Notification fails to send > System retries or logs error.
-
-- **Use Case 7**: Manage Itinerary
-    - **Title**: Organize bookings into itinerary
-    - **Description**: Users can group multiple bookings into a single itinerary for better trip management.
-    - **Actors**: Registered End User
-    - **Preconditions**: User is logged in and has at least one booking.
-    - **Postconditions**: Bookings are linked to an itinerary.
-    - **Main Flow**: User creates itinerary > User selects bookings > System links bookings to itinerary > User saves itinerary.
-    - **Alternate Flows**: No bookings available > System shows message.
-
-### System Features
-- **Feature 1**: User Auth
-  - **Description**: Allow users to register and log in.
-  - **Priority**: High
+- **Use Case 1**: User Authentication
+  - **Description**: Users can register and log in to access personalized features.
+  - **Actors**: End User.
   - **Inputs**: Email, password
-  - **Processing**: Validate input, check for user account
-  - **Outputs**: User is logged in
-  - **Error Handling**: Show error messages for invalid input
+  - **Preconditions**: User is on authentication page.
+  - **Process**: User submits credentials > System validates input > Account is created or authenticated.
+  - **Outputs**: User is logged in.
+  - **Error Handling**:
+    - Invalid email format > Show error message.
+    - Existing email > Prompt login instead.
 
-- **Feature 2**: Flight Search Engine
-  - **Description**: Filtering mechanism to query the database for flights based on route and date.
-  - **Priority**: High
-  - **Inputs**: Origin place, Destination place
-  - **Processing**: Validate input, Show result
-  - **Outputs**: User gets list of available flights based on search criteria.
-  - **Error Handling**: Shows "No Result"
+- **Use Case 2**: Flight Search
+    - **Description**: Users can search for available flights based on route and date.
+    - **Actors**: End User / Guest
+    - **Preconditions**: Flight data exists in database.
+    - **Process**: User submits search > System queries database > Returns matching flights.
+    - **Outputs**: List of available flights or “No results”.
+    - **Error Handling**:
+      - No flights found > Suggest alternative dates.
 
-- **Feature 3**: Passenger Management
-  - **Description**: A form to collect legal names and details for one or more travelers.
-  - **Priority**: High
-  - **Inputs**: Government identity, Birthdate, email, contact etc.
-  - **Processing**: Validate input required or optional
-  - **Outputs**: System accepts the input
-  - **Error Handling**: Look for duplicates
+- **Use Case 3**: Flight Booking (Core Feature)
+    - **Description**: Users reserve a flight by providing passenger details.
+    - **Actors**: End User / Guest
+    - **Preconditions**: Flight is selected.
+    - **Process**: User inputs details > System validates > Calculates price > Saves booking.
+    - **Outputs**: Booking record with unique PNR.
+    - **Error Handling**:
+      - Invalid input > Show validation errors.
+      - Flight full > Suggest alternatives.
+      - Session timeout > Restart process.
 
-- **Feature 4**: Payment Processing
-  - **Description**: Allows users to securely pay for flight bookings.
-  - **Priority**: High
-  - **Inputs**: Payment details (card, e-wallet, etc.)
-  - **Processing**: Validate payment and process transaction via payment gateway
-  - **Outputs**: Payment confirmation and booking status update
-  - **Error Handling**: Display payment failure message and allow retry
+- **Use Case 4**: Booking Management
+    - **Description**: Users can view or cancel bookings.
+    - **Actors**: Registered End User
+    - **Process**: Retrieve bookings > Display details.
+    - **Outputs**: Booking list or updated status.
+    - **Error Handling**:
+      - No bookings > Show empty state.
+      - Cancellation failure > Show error.
 
-- **Feature 5**: Notification System
-  - **Description**: Sends notifications to users regarding booking confirmations, cancellations, and flight updates.
-  - **Priority**: Medium
-  - **Inputs**: Booking updates, flight status changes
-  - **Processing**: System detects event > Generates notification > Stores and sends notification to user
-  - **Outputs**: User receives notification
-  - **Error Handling**: If notification fails, system logs error and retries sending
+- **Use Case 5**: Payment Processing (Mock)
+    - **Description**: Users complete payment for booking.
+    - **Actors**: End User / Guest
+    - **Inputs**: Payment details
+    - **Preconditions**: Booking exists.
+    - **Process**: Validate input > Simulate payment transaction
+    - **Outputs**: Payment confirmation and booking update
+    - **Error Handling**:
+      - Payment failed > Allow retry
+      - Timeout > Cancel transaction.
+    - **Note**: Payment processing is simulated. No real transactions occur.
 
-- **Feature 6**: Itinerary Management
-  - **Description**: Allows users to organize multiple bookings into a structured itinerary.
-  - **Priority**: Medium
-  - **Inputs**: Booking IDs, itinerary name
-  - **Processing**: Validate bookings > Link bookings to itinerary > Save itinerary
-  - **Outputs**: Itinerary created and displayed to user
-  - **Error Handling**: If no bookings available, system shows appropriate message
+- **Use Case 6**: Notifications
+    - **Description**: Users receive updates about bookings.
+    - **Inputs**: Booking, flight updates, or promotions.
+    - **Preconditions**: User is logged in.
+    - **Process**: System generates and sends notification
+    - **Outputs**: Notification displayed
+    - **Error Handling**:
+      - Failed delivery → Retry or log error
 
-- **Feature 7**: Seat Selection
-  - **Description**: Allow users to select available seats.
-  - **Priority**: High
-  - **Inputs**: Selected seat from cabin map.
-  - **Processing**: Validate input required
-  - **Outputs**: Seat marked as 'Selected'; lock timer starts.
-  - **Error Handling**: Seat taken by another user- prompt to select anothe seat. 
+- **Use Case 7**: Itinerary Management
+    - **Description**: Users organize bookings into itineraries.
+    - **Inputs**: Booking IDs, itinerary name
+    - **Preconditions**: User is logged in and has at least one booking.
+    - **Process**: Link bookings > Save itinerary.
+    - **Outputs**: Structured itinerary.
+    - **Error Handling**:
+      - No bookings > Show message.
 
-- **Feature 8**: Booking Confirmation
-  - **Description**: Notifies the user when the Booking is successful.
-  - **Priority**: High
-  - **Inputs**: Confirmed passenger and seat data.
-  - **Processing**: Validate input required
-  - **Outputs**: Unique PNR generated; confirmation screen shown.
-  - **Error Handling**: Payment fails- booking not saved; user prompted to retry. 
-
-
+- **Use Case 8**: Seat Selection
+    - **Description**: Users select available seats from a cabin map.
+    - **Inputs**: Selected seat
+    - **Preconditions**: User is logged in and has at least one booking.
+    - **Process**: System checks availability > Locks seat temporarily
+    - **Outputs**: Seat marked as selected
+    - **Error Handling**:
+      - Seat already taken > Prompt reselection
 
 
 ## 8. Non-Functional Requirements
@@ -327,6 +273,7 @@ A personalized hub for managing the travel lifecycle.
   - **Itinerary**: { id, userId, guestEmail, bookings: [{ bookingId, type, gate }], isActive }
   - **Notification**: { id, userId, guestEmail, type, message, referenceId, referenceModel, isRead, emailSent, emailsentAt, isActive }
   - **Seats**: {id, flightId, seatNumber, class, isOccupied, lockedUntil} 
+
 - **Database Requirements**: 
   - Use MongoDB for storing user, product, and order data.
 - **Data Storage and Retrieval**: 
@@ -351,20 +298,20 @@ A personalized hub for managing the travel lifecycle.
   - 'Hardware Agnostic' it runs on every device with modern browser installed in their device of choice e.g. smartphone, tablet, laptop, personal computer. 
 - **Software Interfaces**: 
   - MongoDB database: Primary database. Express.js communicates with MongoDB via Mongoose ODM library.
-  - Browser Geolocation API(navigator.geolocation): Used optionally to detect the user's nearest airport for search widget auto-fill. Free, built-in and requires user permission.
+  - Location Logic Interface: Internal JSON lookup table mapping Test Profiles to IATA airport codes (e.g., Profile_A = 'MNL'). This removes external dependencies on the Browser Geolocation API during the testing cycle.
 
 ## 11. Glossary
-- **SKU**: Stock Keeping Unit
-- **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action
 - **API(Application Programming Interface)**: A defined set of rules enabling software components to communicate with each other.
-- **Bootstrap 5**: A popular open-source CSS framework for building responsive, mobile-first web pages using pre-built UI components. 
-- **Express.js**: A lightweight and flexible Node.js web application framework used to build server-side applications and RESTful APIs. 
-- **GDS(Global Distribution System)**: a network platform used by travel agencies to access real-time airline seat inventory and pricing. 
+- **Bootstrap 5**: A popular open-source CSS framework for building responsive, mobile-first web pages using pre-built UI components.
+- **CTA:** Call To Action - a UI element(e.g. button) prompting the user to take a specific action.
+- **Express.js**: A lightweight and flexible Node.js web application framework used to build server-side applications and RESTful APIs.
+- **GDS(Global Distribution System)**: a network platform used by travel agencies to access real-time airline seat inventory and pricing.
 - **MongoDB**: A NoSQL, document-oriented database that stores data in flexible JSON-like documents instead of fixed relational tables
 - **Node.js**: An open-source, cross-platform JavaScript runtime environment that executes JavaScript code server-side. 
 - **PNR(Passenger Name Record)**: A unique alphanumeric booking reference code generated for each confirmed reservation. 
 - **Postman**: A collaborative platform and tool used by developers to design, test, and debug API endpoints during development. 
 - **REST(Representational State Transfer)**: A standard architectural style for designing networked APIs using HTTP methods. 
+- **SKU**: Stock Keeping Unit.
 - **UID(User Identification)**: A unique identifier automatically assigned to each registered user account in the system.
 
 ## 12. Appendices
@@ -374,11 +321,12 @@ A personalized hub for managing the travel lifecycle.
   - Trello Board- TBD
   - Figma Mockups- TBD
 
-- **Revision History**: 
-  - **v1.0**: Initial version - April 11, 2026
-  - **v1.1**: First revision - April 14, 2026
-      - Added details on Section 3.4, 5.
-      - Added Feature 7 & 8 on system requirements
-      - Added Glossary terms and Appendices
-  - **v1.2**: Added missing details / improved sections - April 15, 2026
 
+### 12.1 Revision History
+
+| Version | Date | Description |
+| :--- | :--- | :--- |
+| **v1.0** | 2026-04-11 | Initial version - Base architecture and project outline. |
+| **v1.1** | 2026-04-14 | **Structural Updates:** Added details to Section 3.4 & 5; Integrated System Features 7 & 8; Expanded Glossary and Appendices. |
+| **v1.2** | 2026-04-15 | **Content Refinement:** Improved functional requirement descriptions and addressed missing system details. |
+| **v1.3** | 2026-05-06 | **Technical Pivot:** Replaced live Geolocation API with **Mock Location Logic** for demo stability; updated **Typography** and **Color Palette** to align with v1.0 Design System assets. |
