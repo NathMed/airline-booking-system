@@ -123,28 +123,34 @@ module.exports.updateProfile = (req, res) => {
 };
 
 module.exports.updateEmail = (req, res) => {
-	const { email } = req.body;
+    const { email } = req.body;
 
-	if (!email || !email.includes("@")) {
-		return res.status(400).send({ message: "Incorrect email format"});
-	}
+    if (!email || !email.includes("@")) {
+        return res.status(400).send({ message: "Incorrect email format" });
+    }
 
-	return User.findByIdAndUpdate(
-		req.user.id,
-		{ email },
-		{ new: true }
-	)
-		.then((result) =>{
-			if (!result) {
-				return res.status(404).send({ message: "User not found"});
-			} 
-				return res.status(200).send({ 
-					message: "Email updated successfully",
-					result
-				});
-			
-		})
-		.catch((err) => errorHandler(err, req, res));
+    return User.findOne({ email })
+        .then(existingUser => {
+            if (existingUser && String(existingUser._id) !== req.user.id) {
+                return res.status(409).send({ message: "Email is already in use" });
+            }
+
+            return User.findByIdAndUpdate(
+                req.user.id,
+                { email },
+                { new: true }
+            )
+            .then(result => {
+                if (!result) {
+                    return res.status(404).send({ message: "User not found" });
+                }
+                return res.status(200).send({
+                    message: "Email updated successfully",
+                    result
+                });
+            });
+        })
+        .catch(err => errorHandler(err, req, res));
 };
 
 module.exports.updatePassword = (req, res) => {

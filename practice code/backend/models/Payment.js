@@ -34,7 +34,8 @@ const paymentSchema = new mongoose.Schema({
 	transactionId: {
 		type: String,
 		default: null,
-		unique: true
+		unique: true,
+		sparse: true
 	},
 
 	paidAt: {

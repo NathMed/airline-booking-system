@@ -20,6 +20,9 @@ module.exports.createBookingPassenger = (req, res) => {
             if (!booking.isActive) { 
                 return res.status(400).send({ message: "Cannot add passenger to an inactive booking" });
             }
+            if (booking.userId && String(booking.userId) !== req.user.id) {
+                return res.status(403).send({ message: "Unauthorized to add passengers to this booking" });
+            }
 
             return Passenger.findById(passengerId) 
                 .then(passenger => {

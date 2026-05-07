@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/search", flightController.searchFlights);
 
-router.get("/get-fligt/:id", flightController.getFlightById);
+router.get("/get-flight/:id", flightController.getFlightById);
 
 // ADMIN LEVEL ACCESS
 router.get("/get-all-flights", verify, verifyAdmin, flightController.getAllFlights);

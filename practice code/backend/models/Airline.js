@@ -13,8 +13,8 @@ const airlineSchema = new mongoose.Schema({
 		required: [true, "2-letter IATA code is required"],
 		unique: true,
 		uppercase: true,
-		minLength: 2,
-		maxLength: 2
+		minlength: 2,
+		maxlength: 2
 	},
 
 	logoURL:{

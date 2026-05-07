@@ -1,7 +1,7 @@
 const Payment = require("../models/Payment");
 const Booking = require("../models/Booking");
 const { errorHandler } = require("../auth");
-
+const { createNotification } = require("./notification");
 
 // USER LEVEL ACCESS
 
@@ -216,10 +216,36 @@ module.exports.updatePaymentStatus = (req, res) => {
                 },
                 { new: true }
             )
-            .then(result => res.status(200).send({
-                message: "Status updated successfully",
-                result
-            }));
+            .then(result => {
+                if (status === "paid") {
+                    return Booking.findByIdAndUpdate(
+                        result.bookingId,
+                        { status: "confirmed" },
+                        { new: true }
+                    )
+                    .then(updatedBooking => {
+                        if (updatedBooking) {
+                            createNotification({
+                                userId: updatedBooking.userId,
+                                guestEmail: updatedBooking.guestEmail,
+                                type: "booking_confirmed",
+                                message: `Your booking ${updatedBooking.bookingReference} has been confirmed.`,
+                                referenceId: updatedBooking._id,
+                                referenceModel: "Booking"
+                            });
+                        }
+                        return res.status(200).send({
+                            message: "Payment marked as paid and booking confirmed",
+                            result
+                        });
+                    });
+                }
+
+                return res.status(200).send({
+                    message: "Status updated successfully",
+                    result
+                });
+            });
         })
         .catch(err => errorHandler(err, req, res));
 };

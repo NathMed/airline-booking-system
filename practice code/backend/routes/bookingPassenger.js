@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/create-booking-passenger", verify, bookingPassengerController.createBookingPassenger);
 
-router.get("/get-booking-booking-passengers/:bookingId", bookingPassengerController.getBookingPassengerByBooking);
+router.get("/get-booking-passengers/:bookingId", bookingPassengerController.getBookingPassengerByBooking);
 
 
 

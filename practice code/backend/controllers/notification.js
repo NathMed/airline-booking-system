@@ -15,7 +15,7 @@ const simulateEmailSend = (recipient, message) => {
 
 //  NOTIFICATION FACTORY 
 module.exports.createNotification = ({ userId, guestEmail, type, message, referenceId, referenceModel }) => {
-    const recipient = guestEmail || userId;
+    const recipient = guestEmail || `[User ID: ${userId}]`;
 
     const newNotification = new Notification({
         userId: userId || null,

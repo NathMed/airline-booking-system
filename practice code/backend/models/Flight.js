@@ -52,7 +52,12 @@ const flightSchema = new mongoose.Schema({
 		min: [0, "Price must not be negative"]
 	},
 
-	terminal: {
+	originTerminal: {
+		type: String,
+		default: null
+	},
+
+	destinationTerminal: {
 		type: String,
 		default: null
 	},

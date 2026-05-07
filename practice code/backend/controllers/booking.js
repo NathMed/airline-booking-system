@@ -43,10 +43,24 @@ module.exports.createBookingUser = (req, res) => {
                     });
 
                     return newBooking.save()
-                        .then(result => res.status(201).send({
-                            message: "Booking created successfully",
-                            bookingReference: result.bookingReference
-                        }));
+                        .then(result => {
+                            return Flight.findById(flightId)
+                                .then(flight => {
+                                    return res.status(201).send({
+                                        message: "Booking created successfully",
+                                        bookingReference: result.bookingReference,
+                                        bookingId: result._id,
+                                        flight: {
+                                            flightNumber: flight.flightNumber,
+                                            departureTime: flight.departureTime,
+                                            arrivalTime: flight.arrivalTime,
+                                            status: flight.status
+                                        },
+                                        totalAmount: result.totalAmount,
+                                        status: result.status
+                                    });
+                                });
+                        });
                 });
         })
         .catch(err => errorHandler(err, req, res));
@@ -94,10 +108,24 @@ module.exports.createBookingGuest = (req, res) => {
                     });
 
                     return newBooking.save()
-                        .then(result => res.status(201).send({
-                            message: "Booking created successfully",
-                            bookingReference: result.bookingReference
-                        }));
+                        .then(result => {
+                            return Flight.findById(flightId)
+                                .then(flight => {
+                                    return res.status(201).send({
+                                        message: "Booking created successfully",
+                                        bookingReference: result.bookingReference,
+                                        bookingId: result._id,
+                                        flight: {
+                                            flightNumber: flight.flightNumber,
+                                            departureTime: flight.departureTime,
+                                            arrivalTime: flight.arrivalTime,
+                                            status: flight.status
+                                        },
+                                        totalAmount: result.totalAmount,
+                                        status: result.status
+                                    });
+                                });
+                        });
                 });
         })
         .catch(err => errorHandler(err, req, res));

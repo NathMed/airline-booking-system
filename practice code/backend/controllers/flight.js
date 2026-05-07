@@ -55,7 +55,7 @@ module.exports.getFlightById = (req, res) => {
 // ADMIN LEVEL ACCESS
 
 module.exports.createFlight = (req, res) => {
-	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber,	departureTime, arrivalTime,	basePrice, terminal } = req.body;
+	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber,	departureTime, arrivalTime,	basePrice, originTerminal, destinationTerminal } = req.body;
 
 	if (!airlineId) {
 		return res.status(400).send({ message: "Airline ID required" });
@@ -134,7 +134,8 @@ module.exports.createFlight = (req, res) => {
 												arrivalTime,
 												status: "scheduled",
 												basePrice,
-												terminal: terminal || null,
+												originTerminal: originTerminal || null,
+												destinationTerminal: destinationTerminal || null,
 												isActive: true
 											});
 
@@ -166,7 +167,7 @@ module.exports.getAllFlights = (req, res) => {
 };
 
 module.exports.updateFlight = (req, res) => {
-	const {	airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber,	departureTime, arrivalTime,	status,	basePrice, terminal } = req.body;
+	const {	airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber,	departureTime, arrivalTime,	status,	basePrice, originTerminal, destinationTerminal } = req.body;
 
 	return Flight.findByIdAndUpdate(
 		req.params.id,
@@ -180,7 +181,8 @@ module.exports.updateFlight = (req, res) => {
 			arrivalTime,
 			status,
 			basePrice,
-			terminal: terminal || null
+			originTerminal: originTerminal || null,
+			destinationTerminal: destinationTerminal || null
 		},
 		{ new: true }
 	)
