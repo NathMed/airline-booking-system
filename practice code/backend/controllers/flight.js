@@ -2,8 +2,34 @@ const Flight = require("../models/Flight");
 const Aircraft = require("../models/Aircraft");
 const Airline = require("../models/Airline");
 const Airport = require("../models/Airport");
+const Seat = require("../models/Seat");
 const { createNotification } = require("./notification");
 const { errorHandler } = require("../auth");
+
+
+
+const COLUMNS = ['A', 'B', 'C', 'D', 'E', 'F'];
+const BUSINESS_ROWS = 2;
+const SEATS_PER_ROW = 6;
+
+const generateSeatDocuments = (flightId, totalSeats) => {
+	const seats = [];
+
+	for (let i = 0; i < totalSeats; i++) {
+		const row = Math.floor(i / SEATS_PER_ROW) + 1;
+		const col = COLUMNS[i % SEATS_PER_ROW];
+
+		seats.push({
+			flightId,
+			seatNumber: `${row}${col}`,
+			class: row <= BUSINESS_ROWS ? 'business' : 'economy',
+			isOccupied: false,
+			isActive: true
+		});
+	}
+
+	return seats;
+};
 
 
 // USER LEVEL ACCESS
@@ -15,16 +41,25 @@ module.exports.searchFlights = (req, res) => {
 	if (!req.query.destinationAirportId) {
 		return res.status(400).send({ message: "Destination Airport ID required" });
 	}
+	if (!req.query.departureDate) {
+		return res.status(400).send({ message: "Departure date required" });
+	}
+
+	const startOfDay = new Date(req.query.departureDate);
+	startOfDay.setUTCHours(0, 0, 0, 0);
+	const endOfDay = new Date(req.query.departureDate);
+	endOfDay.setUTCHours(23, 59, 59, 999);
 
 	return Flight.find({
 		originAirportId: req.query.originAirportId,
 		destinationAirportId: req.query.destinationAirportId,
+		departureTime: { $gte: startOfDay, $lte: endOfDay },
 		isActive: true,
 		status: "scheduled"
 	})
 	.then(result => {
 		if (result.length === 0) {
-			return res.status(404).send({ message: "No flights found" });
+			return res.status(404).send({ message: "No flights found for this date" });
 		}
 		return res.status(200).send({
 			message: "Flights found",
@@ -55,7 +90,7 @@ module.exports.getFlightById = (req, res) => {
 // ADMIN LEVEL ACCESS
 
 module.exports.createFlight = (req, res) => {
-	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber,	departureTime, arrivalTime,	basePrice, originTerminal, destinationTerminal } = req.body;
+	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, basePrice, originTerminal, destinationTerminal } = req.body;
 
 	if (!airlineId) {
 		return res.status(400).send({ message: "Airline ID required" });
@@ -140,10 +175,22 @@ module.exports.createFlight = (req, res) => {
 											});
 
 											return newFlight.save()
-												.then(result => res.status(201).send({
-													message: "Flight created successfully",
-													result
-												}));
+												.then(savedFlight => {
+													
+													const seatDocuments = generateSeatDocuments(
+														savedFlight._id,
+														aircraft.totalSeats
+													);
+
+													return Seat.insertMany(seatDocuments)
+														.then(seats => {
+															return res.status(201).send({
+																message: "Flight created successfully",
+																result: savedFlight,
+																seatsGenerated: seats.length
+															});
+														});
+												});
 										});
 								});
 						});
@@ -167,7 +214,7 @@ module.exports.getAllFlights = (req, res) => {
 };
 
 module.exports.updateFlight = (req, res) => {
-	const {	airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber,	departureTime, arrivalTime,	status,	basePrice, originTerminal, destinationTerminal } = req.body;
+	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, originTerminal, destinationTerminal } = req.body;
 
 	return Flight.findByIdAndUpdate(
 		req.params.id,
@@ -186,27 +233,26 @@ module.exports.updateFlight = (req, res) => {
 		},
 		{ new: true }
 	)
-	
 	.then(result => {
-	    if (!result) {
-	        return res.status(404).send({ message: "Flight not found" });
-	    }
+		if (!result) {
+			return res.status(404).send({ message: "Flight not found" });
+		}
 
-	    if (status === "delayed" || status === "cancelled") {
-	        createNotification({
-	            userId: null,
-	            guestEmail: null,
-	            type: "flight_status_change",
-	            message: `Flight ${result.flightNumber} has been ${status}.`,
-	            referenceId: result._id,
-	            referenceModel: "Flight"
-	        });
-	    }
+		if (status === "delayed" || status === "cancelled") {
+			createNotification({
+				userId: null,
+				guestEmail: null,
+				type: "flight_status_change",
+				message: `Flight ${result.flightNumber} has been ${status}.`,
+				referenceId: result._id,
+				referenceModel: "Flight"
+			});
+		}
 
-	    return res.status(200).send({
-	        message: "Flight updated successfully",
-	        result
-	    });
+		return res.status(200).send({
+			message: "Flight updated successfully",
+			result
+		});
 	})
 	.catch(err => errorHandler(err, req, res));
 };
@@ -226,10 +272,18 @@ module.exports.deactivateFlight = (req, res) => {
 				{ isActive: false },
 				{ new: true }
 			)
-			.then(result => res.status(200).send({
-				message: "Flight deactivated successfully",
-				result
-			}));
+			.then(result => {
+				return Seat.updateMany(
+					{ flightId: req.params.id },
+					{ isActive: false }
+				)
+				.then(() => {
+					return res.status(200).send({
+						message: "Flight deactivated successfully",
+						result
+					});
+				});
+			});
 		})
 		.catch(err => errorHandler(err, req, res));
 };
@@ -249,10 +303,18 @@ module.exports.reactivateFlight = (req, res) => {
 				{ isActive: true },
 				{ new: true }
 			)
-			.then(result => res.status(200).send({
-				message: "Flight reactivated successfully",
-				result
-			}));
+			.then(result => {
+				return Seat.updateMany(
+					{ flightId: req.params.id, isOccupied: false },
+					{ isActive: true }
+				)
+				.then(() => {
+					return res.status(200).send({
+						message: "Flight reactivated successfully",
+						result
+					});
+				});
+			});
 		})
 		.catch(err => errorHandler(err, req, res));
 };

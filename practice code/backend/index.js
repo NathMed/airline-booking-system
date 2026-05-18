@@ -16,9 +16,14 @@ const passengerRoutes = require("./routes/passenger");
 const paymentRoutes = require("./routes/payment");
 const itineraryRoutes = require("./routes/itinerary");
 const notificationRoutes = require("./routes/notification");
+const seatRoutes = require("./routes/seat");
+const cors = require('cors');
+
 
 // APP INITIALIZATION 
 const app = express();
+app.use(cors());
+
 
 //DATABASE CONNECTION
 mongoose.connect(process.env.MONGODB_STRING);
@@ -42,6 +47,7 @@ app.use("/passengers", passengerRoutes);
 app.use("/payments", paymentRoutes);
 app.use("/itineraries", itineraryRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/seats", seatRoutes);
 
 
 

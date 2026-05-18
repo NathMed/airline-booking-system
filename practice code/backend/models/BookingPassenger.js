@@ -13,6 +13,12 @@ const bookingPassengerSchema = new mongoose.Schema({
 		required: [true, "Passenger ID is required"]
 	},
 
+	seatId: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: "Seat",
+		required: [true, "Seat ID is required"]
+	},
+
 	ticketNumber: {
 		type: String,
 		unique: true,

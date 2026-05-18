@@ -41,17 +41,37 @@ module.exports.createPaymentUser = (req, res) => {
                         bookingId,
                         paymentMethod,
                         amount,
-                        status: "pending",
+                        status: "paid",
                         transactionId: "TXN-" + Date.now(),
-                        paidAt: null
+                        paidAt: new Date()
                     });
 
                     return newPayment.save()
-                        .then(result => res.status(201).send({
-                            message: "Payment created successfully",
-                            transactionId: result.transactionId,
-                            status: result.status
-                        }));
+                        .then(result => {
+                            return Booking.findByIdAndUpdate(
+                                bookingId,
+                                { status: "confirmed" },
+                                { new: true }
+                            )
+                            .then(updatedBooking => {
+                                if (updatedBooking) {
+                                    createNotification({
+                                        userId: updatedBooking.userId,
+                                        guestEmail: updatedBooking.guestEmail,
+                                        type: "booking_confirmed",
+                                        message: `Your booking ${updatedBooking.bookingReference} has been confirmed.`,
+                                        referenceId: updatedBooking._id,
+                                        referenceModel: "Booking"
+                                    });
+                                }
+                                return res.status(201).send({
+                                    message: "Payment created and booking confirmed successfully",
+                                    transactionId: result.transactionId,
+                                    status: result.status,
+                                    bookingStatus: updatedBooking ? updatedBooking.status : null
+                                });
+                            });
+                        });
                 });
         })
         .catch(err => errorHandler(err, req, res));
@@ -97,17 +117,37 @@ module.exports.createPaymentGuest = (req, res) => {
                         bookingId,
                         paymentMethod,
                         amount,
-                        status: "pending",
+                        status: "paid",
                         transactionId: "TXN-" + Date.now(),
-                        paidAt: null
+                        paidAt: new Date()
                     });
 
                     return newPayment.save()
-                        .then(result => res.status(201).send({
-                            message: "Payment created successfully",
-                            transactionId: result.transactionId,
-                            status: result.status
-                        }));
+                        .then(result => {
+                            return Booking.findByIdAndUpdate(
+                                bookingId,
+                                { status: "confirmed" },
+                                { new: true }
+                            )
+                            .then(updatedBooking => {
+                                if (updatedBooking) {
+                                    createNotification({
+                                        userId: updatedBooking.userId,
+                                        guestEmail: updatedBooking.guestEmail,
+                                        type: "booking_confirmed",
+                                        message: `Your booking ${updatedBooking.bookingReference} has been confirmed.`,
+                                        referenceId: updatedBooking._id,
+                                        referenceModel: "Booking"
+                                    });
+                                }
+                                return res.status(201).send({
+                                    message: "Payment created and booking confirmed successfully",
+                                    transactionId: result.transactionId,
+                                    status: result.status,
+                                    bookingStatus: updatedBooking ? updatedBooking.status : null
+                                });
+                            });
+                        });
                 });
         })
         .catch(err => errorHandler(err, req, res));

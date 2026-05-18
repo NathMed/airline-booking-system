@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Flight 606 — Book Your Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&display=swap" rel="stylesheet" />
+<style>
+/* ─── TOKENS ─────────────────────────── */
+:root {
+  --bg:        #080C18;
+  --surf:      #0D1321;
+  --surf2:     #111827;
+  --surf3:     #172031;
+  --border:    #1F2D45;
+  --border2:   #263652;
+  --accent:    #F59E0B;
+  --accent-lo: #78350F;
+  --amber:     #FCD34D;
+  --text:      #DDE6F0;
+  --muted:     #5A7090;
+  --muted2:    #8AA0BC;
+  --ok:        #10B981;
+  --err:       #EF4444;
+  --warn:      #F59E0B;
+  --info:      #3B82F6;
+  --font-head: 'Syne', sans-serif;
+  --font-serif:'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --r:  8px;
+  --rmd:12px;
+  --rlg:16px;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font-body); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+a, button { cursor:pointer; }
+input, select, textarea { font-family:var(--font-body); }
+
+/* ─── AUTH SCREEN ─────────────────────── */
+#auth-screen {
+  position:fixed; inset:0; z-index:100;
+  display:flex; flex-direction:column;
+  background:
+    linear-gradient(to right,rgba(0,0,0,.72) 0%,rgba(10,6,2,.55) 45%,rgba(20,10,0,.35) 70%,rgba(0,0,0,.5) 100%),
+    linear-gradient(160deg,#0a0500 0%,#1c0e00 25%,#2a1500 45%,#1a0c00 65%,#050305 100%);
+  overflow:hidden;
+}
+#auth-screen::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 55% 70% at 68% 45%,rgba(180,90,10,.22) 0%,transparent 60%),
+    radial-gradient(ellipse 30% 50% at 75% 50%,rgba(245,158,11,.12) 0%,transparent 50%);
+}
+#auth-screen::after {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 40% at 10% 50%,rgba(0,0,0,.6) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 5% 10%,rgba(0,0,0,.5) 0%,transparent 60%);
+}
+.ls-nav {
+  position:relative; z-index:2;
+  display:flex; align-items:center;
+  padding:18px 40px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  flex-shrink:0;
+}
+.ls-nav-logo { font-family:var(--font-head); font-weight:800; font-size:18px; color:rgba(255,255,255,.9); letter-spacing:-.3px; margin-right:48px; }
+.ls-nav-links { display:flex; flex:1; }
+.ls-nav-links a { font-family:var(--font-body); font-size:13px; color:rgba(255,255,255,.65); padding:6px 16px; transition:color .2s; white-space:nowrap; }
+.ls-nav-links a:hover { color:#fff; }
+.ls-nav-links a.ls-nav-active { color:var(--accent); }
+.ls-nav-actions { display:flex; align-items:center; gap:20px; }
+.ls-nav-actions span { font-size:13px; color:rgba(255,255,255,.6); display:flex; align-items:center; gap:5px; }
+.ls-body { flex:1; display:flex; align-items:center; padding:0 60px 0 52px; gap:40px; position:relative; z-index:2; min-height:0; overflow:hidden; }
+.ls-left { flex:1; display:flex; flex-direction:column; gap:20px; padding-right:20px; }
+.ls-right { flex-shrink:0; width:400px; display:flex; flex-direction:column; }
+.ls-hero-title { font-family:var(--font-serif); font-size:clamp(38px,5vw,60px); font-weight:900; line-height:1.1; color:#fff; letter-spacing:-.5px; }
+.ls-hero-title em { font-style:italic; color:var(--accent); font-weight:700; }
+.ls-hero-sub { font-family:var(--font-body); font-size:15px; color:rgba(255,255,255,.75); line-height:1.5; }
+.ls-hero-sub strong { color:var(--accent); }
+.ls-quote { display:flex; gap:14px; align-items:flex-start; margin-top:12px; }
+.ls-quote-bar { width:3px; border-radius:2px; flex-shrink:0; background:var(--accent); align-self:stretch; min-height:48px; }
+.ls-quote blockquote { font-family:var(--font-serif); font-style:italic; font-size:14px; color:rgba(255,255,255,.65); line-height:1.6; }
+.ls-quote blockquote strong { color:var(--accent); font-style:normal; }
+.ls-quote cite { display:block; margin-top:6px; font-style:italic; font-size:13px; color:rgba(255,255,255,.45); }
+
+/* AUTH CARD */
+.auth-card {
+  background:rgba(13,19,33,.88);
+  backdrop-filter:blur(20px) saturate(1.2);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  padding:32px 36px 28px;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;
+  max-height:calc(100vh - 120px);
+  overflow-y:auto;
+}
+.auth-pretitle { font-size:13px; color:rgba(255,255,255,.5); margin-bottom:4px; }
+.auth-title { font-family:var(--font-head); font-size:22px; font-weight:800; color:#fff; margin-bottom:20px; }
+.auth-title span { color:var(--accent); }
+.auth-tabs { display:flex; background:rgba(255,255,255,.05); border-radius:var(--r); padding:3px; margin-bottom:24px; }
+.auth-tab { flex:1; padding:8px; border:none; background:none; color:rgba(255,255,255,.5); font-family:var(--font-body); font-size:13px; font-weight:600; border-radius:6px; transition:all .2s; }
+.auth-tab.active { background:rgba(245,158,11,.15); color:var(--accent); }
+.auth-guest { text-align:center; margin-top:14px; font-size:12.5px; color:rgba(255,255,255,.4); }
+.auth-guest a { color:rgba(255,255,255,.6); border-bottom:1px solid rgba(255,255,255,.2); }
+.auth-guest a:hover { color:var(--accent); border-color:var(--accent); }
+.auth-form label { display:block; font-size:11.5px; color:rgba(255,255,255,.7); margin-bottom:6px; font-weight:500; }
+.auth-form input, .auth-form select {
+  width:100%; padding:10px 13px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.13);
+  border-radius:var(--r); color:var(--text); font-size:13.5px;
+  outline:none; transition:border-color .2s; margin-bottom:14px;
+}
+.auth-form input:focus, .auth-form select:focus { border-color:var(--accent); background:rgba(245,158,11,.06); }
+.auth-form select option { background:#111827; color:var(--text); }
+.auth-row { display:flex; gap:12px; }
+.auth-row > div { flex:1; }
+.auth-link-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; font-size:12.5px; color:rgba(255,255,255,.5); }
+.auth-link { color:rgba(255,255,255,.6); cursor:pointer; }
+.auth-link:hover { color:var(--accent); }
+.auth-signup { text-align:center; font-size:13px; color:rgba(255,255,255,.5); margin-top:14px; }
+.auth-signup span { color:var(--accent); cursor:pointer; }
+.auth-signup span:hover { text-decoration:underline; }
+.auth-err { font-size:12.5px; color:var(--err); font-family:var(--font-mono); display:none; margin-top:8px; }
+.btn-auth {
+  width:100%; padding:12px; background:var(--accent); color:#000;
+  border:none; border-radius:var(--r); font-family:var(--font-head); font-weight:700;
+  font-size:14px; transition:background .2s,transform .1s; margin-top:4px;
+}
+.btn-auth:hover { background:var(--amber); }
+.btn-auth:active { transform:scale(.98); }
+
+/* ─── APP SCREEN ──────────────────────── */
+#app-screen { display:flex; flex-direction:column; min-height:100vh; }
+#app-header {
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; height:60px;
+  padding:0 32px; gap:0;
+  background:rgba(8,12,24,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.h-logo { font-family:var(--font-head); font-weight:800; font-size:17px; color:var(--accent); letter-spacing:-.3px; margin-right:40px; flex-shrink:0; }
+.h-nav { display:flex; align-items:center; flex:1; gap:4px; }
+.h-nav-link { padding:7px 14px; font-size:13.5px; font-weight:500; color:var(--muted2); background:none; border:none; border-radius:var(--r); transition:all .2s; white-space:nowrap; }
+.h-nav-link:hover, .h-nav-link.active { color:var(--text); background:var(--surf2); }
+.h-nav-link.active { color:var(--accent); }
+.h-dropdown { position:relative; }
+.h-dropdown-menu {
+  position:absolute; top:calc(100% + 8px); left:0; min-width:180px;
+  background:var(--surf2); border:1px solid var(--border2); border-radius:var(--rmd);
+  padding:6px; box-shadow:0 16px 40px rgba(0,0,0,.5); display:none; z-index:10;
+}
+.h-dropdown:hover .h-dropdown-menu { display:block; }
+.h-dropdown-menu a { display:block; padding:8px 12px; font-size:13.5px; color:var(--muted2); border-radius:var(--r); transition:all .2s; }
+.h-dropdown-menu a:hover { background:var(--surf3); color:var(--text); }
+.h-right { display:flex; align-items:center; gap:8px; margin-left:auto; }
+.h-icon-btn {
+  position:relative; width:36px; height:36px;
+  background:none; border:1px solid var(--border); border-radius:var(--r);
+  color:var(--muted2); font-size:16px; transition:all .2s;
+  display:flex; align-items:center; justify-content:center;
+}
+.h-icon-btn:hover { border-color:var(--border2); color:var(--text); }
+.notif-badge {
+  position:absolute; top:-5px; right:-5px; min-width:16px; height:16px;
+  background:var(--err); color:#fff; font-size:9px; font-weight:700;
+  border-radius:8px; display:none; align-items:center; justify-content:center;
+  padding:0 4px; font-family:var(--font-mono);
+}
+.h-user-btn {
+  display:flex; align-items:center; gap:8px; padding:6px 12px;
+  background:var(--surf2); border:1px solid var(--border); border-radius:var(--r);
+  color:var(--text); font-size:13.5px; font-weight:500; transition:all .2s;
+}
+.h-user-btn:hover { border-color:var(--border2); background:var(--surf3); }
+.h-avatar { width:26px; height:26px; border-radius:50%; background:var(--accent-lo); border:1px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--accent); flex-shrink:0; }
+
+#content-area { flex:1; overflow-y:auto; }
+
+/* ─── SECTIONS ────────────────────────── */
+.section-wrap { padding:32px 40px; max-width:1100px; margin:0 auto; }
+.section-header { margin-bottom:28px; }
+.section-title { font-family:var(--font-serif); font-size:28px; font-weight:700; color:#fff; margin-bottom:4px; }
+.section-sub { font-size:14px; color:var(--muted2); }
+.empty-state { text-align:center; padding:60px 20px; color:var(--muted); font-size:14px; }
+.empty-state .empty-icon { font-size:40px; margin-bottom:12px; display:block; opacity:.4; }
+.spinner { display:inline-block; width:18px; height:18px; border:2px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ─── SEARCH SECTION ─────────────────── */
+.search-hero {
+  background:linear-gradient(135deg,var(--surf) 0%,var(--surf2) 100%);
+  border:1px solid var(--border);
+  border-radius:var(--rlg); padding:36px 40px; margin-bottom:32px;
+  position:relative; overflow:hidden;
+}
+.search-hero::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse 60% 80% at 90% 50%,rgba(245,158,11,.06) 0%,transparent 60%);
+}
+.search-hero-title { font-family:var(--font-serif); font-size:26px; font-weight:700; color:#fff; margin-bottom:6px; }
+.search-hero-sub { font-size:14px; color:var(--muted2); margin-bottom:28px; }
+.search-form { display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:12px; align-items:end; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group label { font-size:11px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); }
+.form-group input, .form-group select {
+  width:100%; padding:11px 14px;
+  background:var(--bg); border:1px solid var(--border2);
+  border-radius:var(--r); color:var(--text); font-size:14px;
+  outline:none; transition:border-color .2s;
+}
+.form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+.form-group select option { background:#111827; }
+.btn-search {
+  padding:11px 28px; background:var(--accent); color:#000;
+  border:none; border-radius:var(--r); font-family:var(--font-head);
+  font-weight:700; font-size:14px; white-space:nowrap;
+  transition:background .2s,transform .1s; letter-spacing:.3px;
+}
+.btn-search:hover { background:var(--amber); }
+.btn-search:active { transform:scale(.98); }
+
+/* FLIGHT CARDS */
+.flights-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.flights-label { font-size:13px; color:var(--muted2); font-family:var(--font-mono); }
+.flights-label strong { color:var(--text); }
+.flight-card {
+  background:var(--surf); border:1px solid var(--border);
+  border-radius:var(--rmd); padding:20px 24px; margin-bottom:12px;
+  display:grid; grid-template-columns:1fr auto auto; gap:24px; align-items:center;
+  transition:border-color .2s,box-shadow .2s;
+}
+.flight-card:hover { border-color:var(--border2); box-shadow:0 4px 20px rgba(0,0,0,.3); }
+.fc-route { display:flex; align-items:center; gap:16px; }
+.fc-airport { }
+.fc-time { font-family:var(--font-head); font-size:22px; font-weight:700; color:#fff; line-height:1; }
+.fc-city { font-size:12px; color:var(--muted2); margin-top:2px; }
+.fc-iata { font-family:var(--font-mono); font-size:11px; color:var(--muted); }
+.fc-middle { text-align:center; flex:1; }
+.fc-duration { font-size:11px; color:var(--muted); font-family:var(--font-mono); margin-bottom:4px; }
+.fc-line { height:1px; background:var(--border2); position:relative; }
+.fc-line::after { content:'✈'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--surf); padding:0 6px; font-size:12px; color:var(--muted2); }
+.fc-flight-num { font-size:11px; color:var(--muted); font-family:var(--font-mono); margin-top:4px; }
+.fc-info { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+.fc-price { font-family:var(--font-head); font-size:22px; font-weight:800; color:var(--accent); }
+.fc-price-note { font-size:11px; color:var(--muted); }
+.fc-status { }
+.btn-book { padding:9px 22px; background:var(--accent); color:#000; border:none; border-radius:var(--r); font-family:var(--font-head); font-weight:700; font-size:13px; transition:all .2s; }
+.btn-book:hover { background:var(--amber); }
+
+/* ─── BOOKING OVERLAY ─────────────────── */
+#booking-overlay {
+  position:fixed; inset:0; z-index:200;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+}
+.bk-top {
+  background:var(--surf); border-bottom:1px solid var(--border);
+  padding:0 32px; display:flex; align-items:center; gap:24px; height:60px; flex-shrink:0;
+}
+.bk-title { font-family:var(--font-head); font-weight:700; font-size:15px; color:var(--text); }
+.bk-flight-pill {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surf2); border:1px solid var(--border); border-radius:20px;
+  padding:4px 12px; font-size:12px; font-family:var(--font-mono); color:var(--muted2);
+}
+.bk-flight-pill strong { color:var(--accent); }
+.bk-steps { display:flex; align-items:center; gap:0; margin-left:auto; }
+.bk-step-item { display:flex; align-items:center; gap:0; }
+.bk-step-dot {
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--border2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; font-family:var(--font-mono); color:var(--muted); font-weight:600;
+  transition:all .3s; background:var(--bg);
+}
+.bk-step-dot.active { border-color:var(--accent); color:var(--accent); background:rgba(245,158,11,.1); }
+.bk-step-dot.done { border-color:var(--ok); background:rgba(16,185,129,.15); color:var(--ok); }
+.bk-step-label-sm { font-size:10px; color:var(--muted); font-family:var(--font-mono); margin:0 6px; white-space:nowrap; }
+.bk-step-item.active .bk-step-label-sm { color:var(--accent); }
+.bk-step-line { width:24px; height:1px; background:var(--border2); }
+.btn-close-bk { margin-left:16px; width:32px; height:32px; border:1px solid var(--border); border-radius:var(--r); background:none; color:var(--muted2); font-size:16px; transition:all .2s; display:flex; align-items:center; justify-content:center; }
+.btn-close-bk:hover { border-color:var(--err); color:var(--err); }
+.bk-body { flex:1; overflow-y:auto; padding:32px; }
+.bk-footer {
+  background:var(--surf); border-top:1px solid var(--border);
+  padding:16px 32px; display:flex; align-items:center; justify-content:space-between;
+  flex-shrink:0;
+}
+.bk-footer-info { font-size:13px; color:var(--muted2); font-family:var(--font-mono); }
+.bk-footer-info strong { color:var(--text); font-size:15px; }
+.btn-bk-back { padding:10px 24px; background:none; border:1px solid var(--border2); border-radius:var(--r); color:var(--muted2); font-family:var(--font-body); font-size:14px; font-weight:500; transition:all .2s; }
+.btn-bk-back:hover { border-color:var(--border); color:var(--text); }
+.btn-bk-next { padding:10px 28px; background:var(--accent); color:#000; border:none; border-radius:var(--r); font-family:var(--font-head); font-weight:700; font-size:14px; transition:all .2s; }
+.btn-bk-next:hover { background:var(--amber); }
+.btn-bk-next:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ─── SEAT MAP ────────────────────────── */
+.seat-map-wrap { max-width:700px; margin:0 auto; }
+.seat-map-info { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+.seat-legend { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted2); }
+.seat-legend-dot { width:14px; height:14px; border-radius:4px; border:1.5px solid transparent; }
+.seat-class-header { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:2px; padding:8px 0 12px; border-top:1px solid var(--border); margin-top:4px; margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+.seat-class-header.business { color:var(--accent); border-color:rgba(245,158,11,.3); }
+.seat-class-header.economy { color:var(--info); border-color:rgba(59,130,246,.3); }
+.seat-col-labels { display:grid; grid-template-columns:32px repeat(3,40px) 24px repeat(3,40px); gap:4px; margin-bottom:6px; }
+.seat-col-label { text-align:center; font-size:10px; font-family:var(--font-mono); color:var(--muted); }
+.seat-row { display:grid; grid-template-columns:32px repeat(3,40px) 24px repeat(3,40px); gap:4px; margin-bottom:4px; align-items:center; }
+.seat-row-num { font-size:10px; font-family:var(--font-mono); color:var(--muted); text-align:right; padding-right:4px; }
+.seat-aisle { }
+.seat {
+  width:40px; height:36px; border-radius:6px 6px 4px 4px;
+  border:1.5px solid transparent;
+  font-size:10px; font-family:var(--font-mono);
+  transition:all .15s; position:relative;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:1px; line-height:1;
+  background:none;
+}
+.seat:not(:disabled):hover { transform:translateY(-2px); }
+.seat-business.available { background:rgba(245,158,11,.1); border-color:rgba(245,158,11,.4); color:var(--accent); }
+.seat-business.available:hover { background:rgba(245,158,11,.2); border-color:var(--accent); }
+.seat-economy.available { background:rgba(59,130,246,.1); border-color:rgba(59,130,246,.4); color:var(--info); }
+.seat-economy.available:hover { background:rgba(59,130,246,.2); border-color:var(--info); }
+.seat.occupied { background:rgba(255,255,255,.03); border-color:rgba(255,255,255,.08); color:rgba(255,255,255,.2); cursor:not-allowed; }
+.seat.selected { background:rgba(16,185,129,.2); border-color:var(--ok); color:var(--ok); transform:translateY(-2px); }
+.seat-num { font-size:9px; }
+.seat-cls { font-size:8px; opacity:.7; }
+.seat-selected-info {
+  position:sticky; bottom:0;
+  background:var(--surf); border:1px solid var(--border2); border-radius:var(--rmd);
+  padding:14px 20px; margin-top:24px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 -4px 20px rgba(0,0,0,.3);
+}
+.seat-selected-info .ssi-label { font-size:12px; color:var(--muted); font-family:var(--font-mono); }
+.seat-selected-info .ssi-val { font-family:var(--font-head); font-size:18px; font-weight:700; color:var(--ok); }
+
+/* ─── PASSENGER STEP ─────────────────── */
+.pax-step-wrap { max-width:600px; margin:0 auto; }
+.pax-tabs { display:flex; background:var(--surf2); border-radius:var(--r); padding:3px; margin-bottom:24px; border:1px solid var(--border); }
+.pax-tab { flex:1; padding:9px; border:none; background:none; color:var(--muted2); font-family:var(--font-body); font-size:13px; font-weight:600; border-radius:6px; transition:all .2s; }
+.pax-tab.active { background:rgba(245,158,11,.12); color:var(--accent); }
+.saved-pax-list { display:flex; flex-direction:column; gap:10px; }
+.saved-pax-card {
+  background:var(--surf); border:2px solid var(--border);
+  border-radius:var(--rmd); padding:16px 18px;
+  display:flex; align-items:center; gap:16px;
+  cursor:pointer; transition:all .2s;
+}
+.saved-pax-card:hover { border-color:var(--border2); }
+.saved-pax-card.selected { border-color:var(--ok); background:rgba(16,185,129,.05); }
+.spc-radio { width:18px; height:18px; border-radius:50%; border:2px solid var(--border2); flex-shrink:0; transition:all .2s; }
+.saved-pax-card.selected .spc-radio { border-color:var(--ok); background:var(--ok); }
+.spc-info { flex:1; }
+.spc-name { font-weight:600; font-size:14px; color:var(--text); }
+.spc-meta { font-size:12px; color:var(--muted2); font-family:var(--font-mono); margin-top:2px; }
+.new-pax-form { }
+.new-pax-form .form-group input,
+.new-pax-form .form-group select { background:var(--surf); border-color:var(--border2); }
+.new-pax-form .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* ─── REVIEW & PAY ────────────────────── */
+.review-wrap { max-width:560px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+.review-card { background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd); overflow:hidden; }
+.review-card-header { background:var(--surf2); padding:12px 18px; font-size:11px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); border-bottom:1px solid var(--border); }
+.review-card-body { padding:16px 18px; }
+.review-field { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.review-field:last-child { margin-bottom:0; }
+.rf-label { font-size:13px; color:var(--muted2); }
+.rf-value { font-size:13.5px; color:var(--text); font-weight:500; }
+.rf-value.accent { color:var(--accent); font-family:var(--font-head); font-size:15px; font-weight:700; }
+.pay-methods { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.pay-method-opt {
+  display:flex; align-items:center; gap:12px; padding:12px 14px;
+  border:1.5px solid var(--border2); border-radius:var(--r);
+  cursor:pointer; transition:all .2s;
+}
+.pay-method-opt:hover { border-color:var(--border); }
+.pay-method-opt.selected { border-color:var(--accent); background:rgba(245,158,11,.05); }
+.pay-method-opt input[type=radio] { accent-color:var(--accent); width:16px; height:16px; }
+.pay-method-label { font-size:13.5px; color:var(--text); flex:1; }
+.pay-method-icon { font-size:18px; }
+
+/* ─── CONFIRMATION ────────────────────── */
+.confirm-wrap { max-width:500px; margin:0 auto; text-align:center; padding:32px 20px; }
+.confirm-icon { width:72px; height:72px; border-radius:50%; background:rgba(16,185,129,.15); border:2px solid var(--ok); color:var(--ok); font-size:32px; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; animation:popIn .4s ease; }
+@keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+.confirm-title { font-family:var(--font-serif); font-size:28px; font-weight:700; color:#fff; margin-bottom:6px; }
+.confirm-sub { font-size:14px; color:var(--muted2); margin-bottom:28px; }
+.confirm-ref { font-family:var(--font-mono); font-size:20px; color:var(--accent); font-weight:500; letter-spacing:1px; margin-bottom:4px; }
+.confirm-ticket { font-family:var(--font-mono); font-size:14px; color:var(--muted); margin-bottom:24px; }
+.confirm-details { background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd); padding:20px; text-align:left; margin-bottom:24px; }
+.cd-row { display:flex; justify-content:space-between; margin-bottom:10px; font-size:13.5px; }
+.cd-row:last-child { margin-bottom:0; }
+.cd-label { color:var(--muted2); }
+.cd-val { color:var(--text); font-weight:500; }
+.confirm-actions { display:flex; gap:12px; justify-content:center; }
+
+/* ─── MY BOOKINGS ─────────────────────── */
+.bookings-grid { display:flex; flex-direction:column; gap:14px; }
+.booking-card {
+  background:var(--surf); border:1px solid var(--border);
+  border-radius:var(--rmd); padding:20px 24px;
+  display:grid; grid-template-columns:1fr auto; gap:20px; align-items:center;
+  transition:border-color .2s;
+}
+.booking-card:hover { border-color:var(--border2); }
+.bc-main { display:flex; flex-direction:column; gap:8px; }
+.bc-ref { font-family:var(--font-mono); font-size:12px; color:var(--accent); letter-spacing:.5px; }
+.bc-flight { font-family:var(--font-head); font-size:16px; font-weight:700; color:#fff; }
+.bc-meta { font-size:13px; color:var(--muted2); }
+.bc-side { display:flex; flex-direction:column; align-items:flex-end; gap:10px; }
+.bc-amount { font-family:var(--font-head); font-size:18px; font-weight:800; color:var(--accent); }
+.bc-actions { display:flex; gap:8px; }
+
+/* ─── MY PASSENGERS ──────────────────── */
+.pax-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.pax-card { background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd); padding:20px; transition:border-color .2s; }
+.pax-card:hover { border-color:var(--border2); }
+.pc-avatar { width:44px; height:44px; border-radius:50%; background:var(--surf2); border:1px solid var(--border2); display:flex; align-items:center; justify-content:center; font-size:18px; margin-bottom:12px; }
+.pc-name { font-weight:700; font-size:15px; color:var(--text); margin-bottom:4px; }
+.pc-field { font-size:12px; color:var(--muted2); font-family:var(--font-mono); margin-bottom:2px; }
+.pc-actions { display:flex; gap:8px; margin-top:14px; }
+
+/* ─── MY PAYMENTS ─────────────────────── */
+.payment-list { display:flex; flex-direction:column; gap:10px; }
+.payment-item {
+  background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd);
+  padding:16px 20px; display:grid; grid-template-columns:1fr auto auto; gap:20px; align-items:center;
+}
+.pi-txn { font-family:var(--font-mono); font-size:12px; color:var(--muted2); }
+.pi-method { font-size:13.5px; color:var(--text); font-weight:500; margin-top:2px; }
+.pi-date { font-size:12px; color:var(--muted); }
+.pi-amount { font-family:var(--font-head); font-size:17px; font-weight:700; color:var(--accent); }
+
+/* ─── MY ITINERARIES ─────────────────── */
+.itin-grid { display:flex; flex-direction:column; gap:16px; }
+.itin-card { background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd); overflow:hidden; }
+.itin-card-header { background:var(--surf2); padding:14px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); }
+.ic-id { font-family:var(--font-mono); font-size:11px; color:var(--muted); }
+.ic-count { font-size:12px; color:var(--muted2); }
+.itin-segments { padding:16px 20px; display:flex; flex-direction:column; gap:10px; }
+.itin-seg { display:flex; align-items:center; gap:12px; font-size:13.5px; }
+.itin-seg-type { font-family:var(--font-mono); font-size:10px; padding:2px 8px; border-radius:10px; border:1px solid var(--border2); color:var(--muted); white-space:nowrap; }
+.itin-seg-type.outbound { border-color:rgba(59,130,246,.4); color:var(--info); }
+.itin-seg-type.return { border-color:rgba(16,185,129,.4); color:var(--ok); }
+.itin-seg-type.layover { border-color:rgba(245,158,11,.4); color:var(--accent); }
+.itin-seg-ref { font-family:var(--font-mono); font-size:11px; color:var(--muted2); }
+.itin-card-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; gap:8px; }
+
+/* ─── NOTIFICATIONS ───────────────────── */
+.notif-toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.notif-list { display:flex; flex-direction:column; gap:8px; }
+.notif-item {
+  background:var(--surf); border:1px solid var(--border);
+  border-radius:var(--rmd); padding:16px 18px;
+  display:grid; grid-template-columns:auto 1fr auto; gap:14px; align-items:start;
+  transition:border-color .2s; cursor:pointer;
+}
+.notif-item.unread { border-color:rgba(245,158,11,.25); background:rgba(245,158,11,.03); }
+.notif-item:hover { border-color:var(--border2); }
+.notif-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.notif-icon.booking_confirmed { background:rgba(16,185,129,.15); }
+.notif-icon.flight_status_change { background:rgba(245,158,11,.15); }
+.notif-icon.itinerary_created { background:rgba(59,130,246,.15); }
+.notif-msg { font-size:13.5px; color:var(--text); line-height:1.5; }
+.notif-time { font-size:11px; color:var(--muted); font-family:var(--font-mono); white-space:nowrap; }
+.notif-unread-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); margin-top:4px; }
+
+/* ─── PROFILE ─────────────────────────── */
+.profile-layout { display:grid; grid-template-columns:260px 1fr; gap:24px; align-items:start; }
+.profile-sidebar { display:flex; flex-direction:column; gap:12px; }
+.profile-card { background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd); padding:24px; text-align:center; }
+.profile-avatar { width:72px; height:72px; border-radius:50%; background:var(--accent-lo); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:28px; font-weight:800; color:var(--accent); font-family:var(--font-head); margin:0 auto 12px; }
+.profile-name { font-size:16px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.profile-email { font-size:12px; color:var(--muted2); font-family:var(--font-mono); }
+.profile-badge { display:inline-block; margin-top:10px; padding:3px 10px; border-radius:10px; font-size:11px; font-family:var(--font-mono); background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); color:var(--accent); }
+.profile-settings { display:flex; flex-direction:column; gap:16px; }
+.settings-card { background:var(--surf); border:1px solid var(--border); border-radius:var(--rmd); overflow:hidden; }
+.settings-card-header { background:var(--surf2); padding:14px 20px; font-size:13px; font-weight:600; color:var(--text); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.settings-card-body { padding:20px; }
+.settings-form { display:flex; flex-direction:column; gap:14px; }
+.settings-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.settings-form .form-group input,
+.settings-form .form-group select { background:var(--surf2); border-color:var(--border2); }
+.settings-form .form-group input:focus,
+.settings-form .form-group select:focus { border-color:var(--accent); }
+
+/* ─── MODALS ──────────────────────────── */
+#modal-backdrop {
+  position:fixed; inset:0; z-index:300;
+  background:rgba(0,0,0,.7); backdrop-filter:blur(4px);
+  display:none; align-items:center; justify-content:center;
+}
+#modal-backdrop.open { display:flex; }
+#modal-content {
+  background:var(--surf); border:1px solid var(--border2);
+  border-radius:var(--rlg); padding:28px 32px;
+  width:100%; max-width:440px; max-height:90vh; overflow-y:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,.6);
+}
+#modal-content h3 { font-family:var(--font-head); font-size:17px; font-weight:700; margin-bottom:20px; color:var(--text); }
+.modal-form .form-group input,
+.modal-form .form-group select { background:var(--bg); border-color:var(--border2); }
+.modal-form .form-group input:focus { border-color:var(--accent); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+
+/* ─── TOAST ────────────────────────────── */
+#toast { position:fixed; bottom:28px; right:28px; z-index:999; display:flex; flex-direction:column; gap:8px; }
+.toast-item {
+  padding:12px 18px; border-radius:var(--r);
+  font-size:13.5px; font-family:var(--font-body);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  animation:slideIn .25s ease;
+  min-width:200px; max-width:320px;
+}
+@keyframes slideIn { from{transform:translateX(40px);opacity:0} to{transform:translateX(0);opacity:1} }
+.toast-ok   { background:#0D2E1F; border:1px solid rgba(16,185,129,.4); color:var(--ok); }
+.toast-err  { background:#2E0D0D; border:1px solid rgba(239,68,68,.4); color:var(--err); }
+.toast-info { background:#0D1A2E; border:1px solid rgba(59,130,246,.4); color:var(--info); }
+
+/* ─── BUTTONS & PILLS ─────────────────── */
+.btn { padding:8px 16px; border:1px solid var(--border2); border-radius:var(--r); background:none; color:var(--text); font-family:var(--font-body); font-size:13px; font-weight:500; transition:all .2s; }
+.btn:hover { background:var(--surf2); }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.btn-ok { background:rgba(16,185,129,.1); border-color:rgba(16,185,129,.3); color:var(--ok); }
+.btn-ok:hover { background:rgba(16,185,129,.2); }
+.btn-del { background:rgba(239,68,68,.1); border-color:rgba(239,68,68,.3); color:var(--err); }
+.btn-del:hover { background:rgba(239,68,68,.2); }
+.btn-create { background:var(--accent); border-color:var(--accent); color:#000; font-weight:700; }
+.btn-create:hover { background:var(--amber); }
+.btn-cancel { background:none; border-color:var(--border2); color:var(--muted2); }
+.btn-primary { padding:10px 24px; background:var(--accent); color:#000; border:none; border-radius:var(--r); font-family:var(--font-head); font-weight:700; font-size:14px; transition:all .2s; }
+.btn-primary:hover { background:var(--amber); }
+.btn-ghost { padding:10px 24px; background:none; color:var(--muted2); border:1px solid var(--border2); border-radius:var(--r); font-family:var(--font-body); font-weight:500; font-size:14px; transition:all .2s; }
+.btn-ghost:hover { color:var(--text); border-color:var(--border); }
+.pill { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-family:var(--font-mono); font-weight:500; }
+.pill-ok   { background:rgba(16,185,129,.15); color:var(--ok); border:1px solid rgba(16,185,129,.3); }
+.pill-err  { background:rgba(239,68,68,.12); color:var(--err); border:1px solid rgba(239,68,68,.25); }
+.pill-warn { background:rgba(245,158,11,.12); color:var(--warn); border:1px solid rgba(245,158,11,.25); }
+.pill-info { background:rgba(59,130,246,.12); color:var(--info); border:1px solid rgba(59,130,246,.25); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════ -->
+<div id="auth-screen">
+  <nav class="ls-nav">
+    <div class="ls-nav-logo">✈ FLIGHT 606</div>
+    <div class="ls-nav-links">
+      <a>Plan Trip</a><a>Travel Info</a><a>Experience</a>
+      <a class="ls-nav-active">Corporate Travel</a><a>Travel Services</a>
+    </div>
+    <div class="ls-nav-actions">
+      <span>🇵🇭 EN</span><span>✦ AskPH</span><span>🔍 Search</span>
+    </div>
+  </nav>
+  <div class="ls-body">
+    <div class="ls-left">
+      <h1 class="ls-hero-title">Paradise <em>Awaits</em><br>Your Arrival</h1>
+      <p class="ls-hero-sub">Your Exclusive Gateway to <strong>First-class</strong> Journey</p>
+      <div class="ls-quote">
+        <div class="ls-quote-bar"></div>
+        <blockquote>
+          "Flight<strong>606</strong> is the only Airline where the journey becomes your destination"
+          <cite>– Manny Paksiw</cite>
+        </blockquote>
+      </div>
+    </div>
+    <div class="ls-right">
+      <div class="auth-card">
+        <div class="auth-pretitle">Ready for your next Adventure?</div>
+        <div class="auth-title">Welcome to <span>Flight 606</span></div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="showAuthTab('login')">Login</button>
+          <button class="auth-tab" onclick="showAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div id="auth-login" class="auth-form">
+          <div class="form-group"><label>E-Mail</label><input type="email" id="l-email" placeholder="example@email.com" /></div>
+          <div class="form-group"><label>Password</label><input type="password" id="l-pass" placeholder="••••••••" /></div>
+          <div class="auth-link-row">
+            <label style="display:flex;align-items:center;gap:7px;cursor:pointer">
+              <input type="checkbox" style="accent-color:var(--accent);width:14px;height:14px"> Remember me
+            </label>
+            <a class="auth-link">Forgot password?</a>
+          </div>
+          <button class="btn-auth" onclick="doLogin()">Login now</button>
+          <div class="auth-err" id="login-err"></div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="auth-register" class="auth-form" style="display:none">
+          <div class="auth-row">
+            <div class="form-group"><label>First Name</label><input type="text" id="r-first" placeholder="Juan" /></div>
+            <div class="form-group"><label>Last Name</label><input type="text" id="r-last" placeholder="dela Cruz" /></div>
+          </div>
+          <div class="auth-row">
+            <div class="form-group"><label>Gender</label>
+              <select id="r-gender"><option value="">— Select —</option><option value="Male">Male</option><option value="Female">Female</option></select>
+            </div>
+            <div class="form-group"><label>Phone (11 digits)</label><input type="text" id="r-phone" placeholder="09XXXXXXXXX" maxlength="11" /></div>
+          </div>
+          <div class="form-group"><label>E-Mail</label><input type="email" id="r-email" placeholder="example@email.com" /></div>
+          <div class="form-group"><label>Password (min 8 chars)</label><input type="password" id="r-pass" placeholder="••••••••" /></div>
+          <div class="form-group"><label>Confirm Password</label><input type="password" id="r-confirm" placeholder="••••••••" /></div>
+          <button class="btn-auth" onclick="doRegister()">Create Account</button>
+          <div class="auth-err" id="reg-err"></div>
+        </div>
+
+        <div class="auth-guest">or <a onclick="doGuestSearch()">continue as guest to search flights</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════ -->
+<div id="app-screen" style="display:none">
+  <header id="app-header">
+    <div class="h-logo">✈ FLIGHT 606</div>
+    <nav class="h-nav">
+      <button class="h-nav-link" onclick="showSection('search')">🔍 Search Flights</button>
+      <div class="h-dropdown">
+        <button class="h-nav-link">My Trips ▾</button>
+        <div class="h-dropdown-menu">
+          <a onclick="showSection('my-bookings')">✈ My Bookings</a>
+          <a onclick="showSection('my-passengers')">👥 My Passengers</a>
+          <a onclick="showSection('my-payments')">💳 My Payments</a>
+          <a onclick="showSection('my-itineraries')">🗺 My Itineraries</a>
+        </div>
+      </div>
+    </nav>
+    <div class="h-right">
+      <button class="h-icon-btn" onclick="showSection('notifications')" title="Notifications">
+        🔔<span class="notif-badge" id="notif-badge"></span>
+      </button>
+      <div class="h-dropdown">
+        <button class="h-user-btn">
+          <div class="h-avatar" id="user-initials">?</div>
+          <span id="user-name-display">User</span> ▾
+        </button>
+        <div class="h-dropdown-menu">
+          <a onclick="showSection('profile')">👤 My Profile</a>
+          <a onclick="doLogout()" style="color:var(--err)">⊘ Logout</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="content-area"></main>
+</div>
+
+<!-- ══════════════════════════════════════
+     BOOKING OVERLAY
+══════════════════════════════════════ -->
+<div id="booking-overlay" style="display:none">
+  <div class="bk-top">
+    <div class="bk-title">Book Your Flight</div>
+    <div class="bk-flight-pill" id="bk-flight-pill">—</div>
+    <div class="bk-steps" id="bk-steps"></div>
+    <button class="btn-close-bk" onclick="closeBooking()">✕</button>
+  </div>
+  <div class="bk-body" id="bk-body"></div>
+  <div class="bk-footer">
+    <div class="bk-footer-info" id="bk-footer-info"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-bk-back" id="bk-back-btn" onclick="bookingBack()">← Back</button>
+      <button class="btn-bk-next" id="bk-next-btn" onclick="bookingNext()">Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-backdrop">
+  <div id="modal-content"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   CONSTANTS & STATE
+═══════════════════════════════════════ */
+const BASE = 'http://localhost:4000';
+
+const state = {
+  token: null,
+  user: null,
+  airports: [],    // cached airport list
+  section: 'search',
+  // booking flow
+  bk: {
+    step: 1,       // 1=seat, 2=passenger, 3=review
+    flight: null,
+    seat: null,
+    seats: [],
+    passenger: null,   // { id, firstName, lastName, ... }
+    newPaxData: null,  // captured form values before step 3 replaces the DOM
+    isNewPax: false,
+    paymentMethod: 'gcash',
+    // results after submission
+    bookingRef: null,
+    ticketNumber: null,
+    bookingId: null
+  }
+};
+
+// Safe registry so flight objects are never serialised into HTML attributes
+const flightRegistry = {};
+
+/* ═══════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════ */
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast-item toast-${type}`;
+  el.textContent = msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+function shortDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-PH', { year:'numeric', month:'short', day:'numeric' });
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleTimeString('en-PH', { hour:'2-digit', minute:'2-digit', hour12:true });
+}
+
+function fmtDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('en-PH', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:true });
+}
+
+function statusPill(s) {
+  const map = { confirmed:'ok', pending:'warn', cancelled:'err', scheduled:'info', delayed:'warn', 'on-time':'ok', arrived:'ok', departed:'info', paid:'ok', failed:'err', refunded:'warn' };
+  return `<span class="pill pill-${map[s]||'info'}">${s}</span>`;
+}
+
+function getAirportName(id) {
+  const a = state.airports.find(x => x._id === id);
+  return a ? `${a.city} (${a.iataCode})` : id?.slice(-6) || '—';
+}
+
+function showModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('modal-backdrop').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-backdrop').classList.remove('open');
+}
+document.getElementById('modal-backdrop').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-backdrop')) closeModal();
+});
+
+/* ═══════════════════════════════════════
+   API HELPER
+═══════════════════════════════════════ */
+async function api(method, path, body, skipAuth = false) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (!skipAuth && state.token) headers['Authorization'] = 'Bearer ' + state.token;
+  const opts = { method, headers };
+  if (body && method !== 'GET') opts.body = JSON.stringify(body);
+  const res = await fetch(BASE + path, opts);
+  const data = await res.json();
+  if (!res.ok) { const err = new Error(data.message || 'Request failed'); err.data = data; throw err; }
+  return data;
+}
+
+/* ═══════════════════════════════════════
+   AUTH
+═══════════════════════════════════════ */
+function showAuthTab(tab) {
+  document.getElementById('auth-login').style.display    = tab === 'login'    ? '' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? '' : 'none';
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register'));
+  });
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  const errEl = document.getElementById('login-err');
+  errEl.style.display = 'none';
+  try {
+    const res = await api('POST', '/users/login', { email, password: pass }, true);
+    state.token = res.access;
+    sessionStorage.setItem('token', res.access);
+    await initApp();
+  } catch(e) {
+    errEl.textContent = e.data?.message || 'Login failed';
+    errEl.style.display = 'block';
+  }
+}
+
+async function doRegister() {
+  const errEl = document.getElementById('reg-err');
+  errEl.style.display = 'none';
+  const payload = {
+    firstName: document.getElementById('r-first').value.trim(),
+    lastName:  document.getElementById('r-last').value.trim(),
+    gender:    document.getElementById('r-gender').value,
+    phone:     document.getElementById('r-phone').value.trim(),
+    email:     document.getElementById('r-email').value.trim(),
+    password:  document.getElementById('r-pass').value,
+    confirmPassword: document.getElementById('r-confirm').value
+  };
+  try {
+    await api('POST', '/users/register', payload, true);
+    toast('Account created! Logging you in…', 'ok');
+    // auto-login
+    const res = await api('POST', '/users/login', { email: payload.email, password: payload.password }, true);
+    state.token = res.access;
+    sessionStorage.setItem('token', res.access);
+    await initApp();
+  } catch(e) {
+    errEl.textContent = e.data?.message || 'Registration failed';
+    errEl.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  state.token = null;
+  state.user  = null;
+  sessionStorage.removeItem('token');
+  document.getElementById('app-screen').style.display  = 'none';
+  document.getElementById('auth-screen').style.display = '';
+}
+
+function doGuestSearch() {
+  // Show app in guest mode (limited — search only)
+  state.token = null;
+  state.user  = null;
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display  = '';
+  document.getElementById('app-header').style.display  = 'none'; // simpler guest header
+  showSection('search');
+}
+
+/* ═══════════════════════════════════════
+   APP INIT
+═══════════════════════════════════════ */
+async function initApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display  = '';
+  document.getElementById('app-header').style.display  = '';
+
+  // Load profile
+  try {
+    state.user = await api('GET', '/users/profile');
+    const initials = (state.user.firstName?.[0] || '') + (state.user.lastName?.[0] || '');
+    document.getElementById('user-initials').textContent      = initials.toUpperCase();
+    document.getElementById('user-name-display').textContent  = state.user.firstName || 'User';
+  } catch(e) {}
+
+  // Load airports (cached for dropdowns)
+  try {
+    const res = await api('GET', '/airports/get-all-airports', null, true);
+    state.airports = res.result || [];
+  } catch(e) {}
+
+  // Notification badge
+  loadNotifBadge();
+
+  showSection('search');
+}
+
+async function loadNotifBadge() {
+  if (!state.token) return;
+  try {
+    const res = await api('GET', '/notifications/my-notifications');
+    const unread = (res.result || []).filter(n => !n.isRead).length;
+    const badge = document.getElementById('notif-badge');
+    if (unread > 0) { badge.textContent = unread; badge.style.display = 'flex'; }
+    else badge.style.display = 'none';
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+function showSection(id) {
+  state.section = id;
+  document.querySelectorAll('.h-nav-link').forEach(el => el.classList.remove('active'));
+  const ca = document.getElementById('content-area');
+  ca.innerHTML = '';
+  const SECTIONS = {
+    'search':          renderSearch,
+    'my-bookings':     renderMyBookings,
+    'my-passengers':   renderMyPassengers,
+    'my-payments':     renderMyPayments,
+    'my-itineraries':  renderMyItineraries,
+    'notifications':   renderNotifications,
+    'profile':         renderProfile,
+  };
+  if (SECTIONS[id]) SECTIONS[id](ca);
+}
+
+/* ═══════════════════════════════════════
+   SECTION: SEARCH FLIGHTS
+═══════════════════════════════════════ */
+function renderSearch(ca) {
+  // Build airport options
+  const airportOpts = state.airports.length
+    ? state.airports.filter(a => a.isActive).map(a =>
+        `<option value="${a._id}">${a.city} — ${a.name} (${a.iataCode})</option>`
+      ).join('')
+    : '<option value="">Loading airports…</option>';
+
+  ca.innerHTML = `
+    <div class="section-wrap">
+      <div class="search-hero">
+        <div class="search-hero-title">Find Your Next Flight</div>
+        <div class="search-hero-sub">Search hundreds of routes across the Philippines and beyond</div>
+        <div class="search-form">
+          <div class="form-group">
+            <label>From</label>
+            <select id="s-origin"><option value="">— Select origin —</option>${airportOpts}</select>
+          </div>
+          <div class="form-group">
+            <label>To</label>
+            <select id="s-dest"><option value="">— Select destination —</option>${airportOpts}</select>
+          </div>
+          <div class="form-group">
+            <label>Departure Date</label>
+            <input type="date" id="s-date" />
+          </div>
+          <button class="btn-search" onclick="searchFlights()">Search →</button>
+        </div>
+      </div>
+      <div id="search-results"></div>
+    </div>`;
+
+  // Set default date to tomorrow
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('s-date').value = tomorrow.toISOString().split('T')[0];
+}
+
+async function searchFlights() {
+  const originId  = document.getElementById('s-origin').value;
+  const destId    = document.getElementById('s-dest').value;
+  const date      = document.getElementById('s-date').value;
+  const results   = document.getElementById('search-results');
+
+  if (!originId || !destId) { toast('Please select origin and destination', 'err'); return; }
+  if (!date)                { toast('Please select a departure date', 'err'); return; }
+  if (originId === destId)  { toast('Origin and destination cannot be the same', 'err'); return; }
+
+  results.innerHTML = `<div class="empty-state"><span class="spinner"></span></div>`;
+
+  try {
+    const res = await api('GET',
+      `/flights/search?originAirportId=${originId}&destinationAirportId=${destId}&departureDate=${date}`,
+      null, true);
+    const flights = res.flights || [];
+
+    // Register flights by ID so onclick only passes a safe string ID
+    flights.forEach(f => { flightRegistry[f._id] = f; });
+
+    const origin = state.airports.find(a => a._id === originId);
+    const dest   = state.airports.find(a => a._id === destId);
+
+    results.innerHTML = `
+      <div class="flights-header">
+        <div class="flights-label">
+          <strong>${flights.length} flight${flights.length !== 1 ? 's' : ''}</strong>
+          found · ${origin?.city || '?'} → ${dest?.city || '?'} · ${shortDate(date + 'T00:00:00')}
+        </div>
+      </div>
+      ${flights.map(f => buildFlightCard(f, origin, dest)).join('')}`;
+  } catch(e) {
+    results.innerHTML = `<div class="empty-state">
+      <span class="empty-icon">✈</span>
+      ${e.data?.message || 'No flights found for this route and date.'}</div>`;
+  }
+}
+
+function buildFlightCard(f, origin, dest) {
+  const dep = fmtTime(f.departureTime);
+  const arr = fmtTime(f.arrivalTime);
+  const depDate = shortDate(f.departureTime);
+
+  // Rough duration
+  const mins = Math.round((new Date(f.arrivalTime) - new Date(f.departureTime)) / 60000);
+  const dur = mins > 0 ? `${Math.floor(mins/60)}h ${mins%60}m` : '—';
+
+  return `
+    <div class="flight-card">
+      <div class="fc-route">
+        <div class="fc-airport">
+          <div class="fc-time">${dep}</div>
+          <div class="fc-city">${origin?.city || '—'}</div>
+          <div class="fc-iata">${origin?.iataCode || '—'}</div>
+        </div>
+        <div class="fc-middle">
+          <div class="fc-duration">${dur}</div>
+          <div class="fc-line"></div>
+          <div class="fc-flight-num">${f.flightNumber}</div>
+        </div>
+        <div class="fc-airport">
+          <div class="fc-time">${arr}</div>
+          <div class="fc-city">${dest?.city || '—'}</div>
+          <div class="fc-iata">${dest?.iataCode || '—'}</div>
+        </div>
+      </div>
+      <div class="fc-info">
+        <div class="fc-price">₱${f.basePrice?.toLocaleString()}</div>
+        <div class="fc-price-note">from / per person</div>
+        <div>${statusPill(f.status)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <button class="btn-book" onclick="startBooking('${f._id}')">Book Now →</button>
+        <div style="font-size:11px;color:var(--muted);font-family:var(--font-mono);">${depDate}</div>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════
+   BOOKING FLOW
+═══════════════════════════════════════ */
+function startBooking(flightId) {
+  if (!state.token) {
+    toast('Please login to book a flight', 'err');
+    return;
+  }
+  const flight = flightRegistry[flightId];
+  if (!flight) { toast('Flight data not found. Please search again.', 'err'); return; }
+  // Reset booking state
+  state.bk = { step:1, flight, seat:null, seats:[], passenger:null, newPaxData:null, isNewPax:false, paymentMethod:'gcash', bookingRef:null, ticketNumber:null, bookingId:null };
+  document.getElementById('booking-overlay').style.display = 'flex';
+  document.getElementById('booking-overlay').style.flexDirection = 'column';
+  renderBookingStep();
+}
+
+function closeBooking() {
+  document.getElementById('booking-overlay').style.display = 'none';
+}
+
+function renderStepIndicator() {
+  const steps = ['Select Seat','Passenger','Review & Pay'];
+  const cur = state.bk.step;
+  let html = '';
+  steps.forEach((label, i) => {
+    const n = i + 1;
+    const cls = n < cur ? 'done' : n === cur ? 'active' : '';
+    html += `<div class="bk-step-item ${cls}">
+      <div class="bk-step-dot ${cls}">${n < cur ? '✓' : n}</div>
+      <div class="bk-step-label-sm">${label}</div>
+    </div>`;
+    if (i < steps.length - 1) html += `<div class="bk-step-line"></div>`;
+  });
+  document.getElementById('bk-steps').innerHTML = html;
+
+  const f = state.bk.flight;
+  document.getElementById('bk-flight-pill').innerHTML =
+    `<strong>${f.flightNumber}</strong> · ${getAirportName(f.originAirportId)} → ${getAirportName(f.destinationAirportId)}`;
+}
+
+function renderBookingStep() {
+  renderStepIndicator();
+  const body = document.getElementById('bk-body');
+  const back = document.getElementById('bk-back-btn');
+  const next = document.getElementById('bk-next-btn');
+
+  back.style.visibility = state.bk.step === 1 ? 'hidden' : 'visible';
+
+  if (state.bk.step === 1) renderStep1Seats(body, next);
+  if (state.bk.step === 2) renderStep2Passenger(body, next);
+  if (state.bk.step === 3) renderStep3Review(body, next);
+}
+
+function bookingBack() {
+  if (state.bk.step > 1) { state.bk.step--; renderBookingStep(); }
+}
+
+function bookingNext() {
+  if (state.bk.step === 1) {
+    if (!state.bk.seat) { toast('Please select a seat', 'err'); return; }
+    state.bk.step = 2; renderBookingStep();
+  } else if (state.bk.step === 2) {
+    if (state.bk.isNewPax) {
+      // Capture form values NOW before the DOM is replaced by step 3
+      const data = {
+        firstName:      document.getElementById('np-first')?.value.trim(),
+        lastName:       document.getElementById('np-last')?.value.trim(),
+        gender:         document.getElementById('np-gender')?.value,
+        dateOfBirth:    document.getElementById('np-dob')?.value,
+        nationality:    document.getElementById('np-nat')?.value.trim(),
+        phone:          document.getElementById('np-phone')?.value.trim(),
+        passportNumber: document.getElementById('np-passport')?.value.trim(),
+        passportExpiry: document.getElementById('np-expiry')?.value,
+      };
+      // Basic front-end validation before proceeding
+      if (!data.firstName || !data.lastName || !data.gender || !data.dateOfBirth ||
+          !data.nationality || !data.passportNumber || !data.passportExpiry) {
+        toast('Please fill in all required passenger fields', 'err'); return;
+      }
+      if (!data.phone || data.phone.length !== 11) {
+        toast('Phone number must be 11 digits', 'err'); return;
+      }
+      state.bk.newPaxData = data;
+      // Set a temporary display name for the review screen
+      state.bk.passenger = { id: null, firstName: data.firstName, lastName: data.lastName };
+    } else {
+      if (!state.bk.passenger) { toast('Please select a passenger profile', 'err'); return; }
+    }
+    state.bk.step = 3; renderBookingStep();
+  } else if (state.bk.step === 3) {
+    submitBooking();
+  }
+}
+
+/* ── Step 1: Seat Map ── */
+async function renderStep1Seats(body, nextBtn) {
+  body.innerHTML = `<div class="empty-state"><span class="spinner"></span> Loading seat map…</div>`;
+  nextBtn.textContent = 'Continue →';
+  nextBtn.disabled = true;
+
+  try {
+    const res = await api('GET', `/seats/get-seats-by-flight/${state.bk.flight._id}`);
+    state.bk.seats = res.seats || [];
+    buildSeatMap(body, nextBtn);
+  } catch(e) {
+    body.innerHTML = `<div class="empty-state">Failed to load seats: ${e.data?.message || 'Error'}</div>`;
+  }
+}
+
+function buildSeatMap(body, nextBtn) {
+  const seats = state.bk.seats;
+  const COLS = ['A','B','C','D','E','F'];
+
+  // Group by row number
+  const rows = {};
+  seats.forEach(s => {
+    const rowNum = parseInt(s.seatNumber.slice(0,-1));
+    if (!rows[rowNum]) rows[rowNum] = {};
+    rows[rowNum][s.seatNumber.slice(-1)] = s;
+  });
+  const rowNums = Object.keys(rows).map(Number).sort((a,b) => a-b);
+  const businessRows = rowNums.filter(r => rows[r]['A']?.class === 'business');
+  const economyRows  = rowNums.filter(r => rows[r]['A']?.class !== 'business');
+
+  function renderRows(rowList, className) {
+    if (!rowList.length) return '';
+    return `
+      <div class="seat-class-header ${className}">
+        ${className === 'business' ? '✦ BUSINESS CLASS' : '● ECONOMY CLASS'}
+      </div>
+      <div class="seat-col-labels">
+        <div></div>
+        <div class="seat-col-label">A</div>
+        <div class="seat-col-label">B</div>
+        <div class="seat-col-label">C</div>
+        <div class="seat-aisle"></div>
+        <div class="seat-col-label">D</div>
+        <div class="seat-col-label">E</div>
+        <div class="seat-col-label">F</div>
+      </div>
+      ${rowList.map(r => {
+        const rowData = rows[r];
+        return `<div class="seat-row">
+          <div class="seat-row-num">${r}</div>
+          ${['A','B','C'].map(col => renderSeat(rowData[col], className)).join('')}
+          <div class="seat-aisle"></div>
+          ${['D','E','F'].map(col => renderSeat(rowData[col], className)).join('')}
+        </div>`;
+      }).join('')}`;
+  }
+
+  function renderSeat(s, cls) {
+    if (!s) return `<button class="seat" disabled style="opacity:.2">—</button>`;
+    const isSelected = state.bk.seat?._id === s._id;
+    let stateCls = isSelected ? 'selected' : (s.isOccupied || !s.isActive ? 'occupied' : 'available');
+    return `<button
+      class="seat seat-${cls} ${stateCls}"
+      id="seat-btn-${s._id}"
+      onclick="selectSeat('${s._id}')"
+      ${s.isOccupied || !s.isActive ? 'disabled' : ''}
+      title="${s.seatNumber} · ${cls} · ${s.isOccupied ? 'Occupied' : 'Available'}">
+      <span class="seat-num">${s.seatNumber}</span>
+    </button>`;
+  }
+
+  const f = state.bk.flight;
+  const bizPrice = f.basePrice * 2;
+  const ecoPrice = f.basePrice;
+
+  body.innerHTML = `
+    <div class="seat-map-wrap">
+      <div class="seat-map-info">
+        <div class="seat-legend"><div class="seat-legend-dot" style="background:rgba(245,158,11,.2);border-color:rgba(245,158,11,.6)"></div> Business (₱${bizPrice.toLocaleString()})</div>
+        <div class="seat-legend"><div class="seat-legend-dot" style="background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.6)"></div> Economy (₱${ecoPrice.toLocaleString()})</div>
+        <div class="seat-legend"><div class="seat-legend-dot" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)"></div> Occupied</div>
+        <div class="seat-legend"><div class="seat-legend-dot" style="background:rgba(16,185,129,.2);border-color:var(--ok)"></div> Your Selection</div>
+        <div style="margin-left:auto;font-size:12px;color:var(--muted2)">
+          ${seats.filter(s=>!s.isOccupied&&s.isActive).length} of ${seats.length} seats available
+        </div>
+      </div>
+      ${renderRows(businessRows, 'business')}
+      ${renderRows(economyRows, 'economy')}
+      <div class="seat-selected-info" id="seat-selected-info">
+        <div>
+          <div class="ssi-label">Selected Seat</div>
+          <div class="ssi-val" id="seat-selected-val" style="color:var(--muted)">None</div>
+        </div>
+        <div style="text-align:right">
+          <div class="ssi-label">Price</div>
+          <div class="ssi-val" id="seat-price-val" style="color:var(--muted)">—</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Refresh if seat already selected
+  if (state.bk.seat) updateSeatDisplay(nextBtn);
+}
+
+function selectSeat(seatId) {
+  // Deselect previous
+  if (state.bk.seat) {
+    const prev = document.getElementById(`seat-btn-${state.bk.seat._id}`);
+    if (prev) {
+      const cls = state.bk.seat.class;
+      prev.classList.remove('selected');
+      prev.classList.add(`seat-${cls}`, 'available');
+    }
+  }
+  state.bk.seat = state.bk.seats.find(s => s._id === seatId);
+  const el = document.getElementById(`seat-btn-${seatId}`);
+  if (el) {
+    el.classList.remove('available');
+    el.classList.add('selected');
+  }
+  updateSeatDisplay(document.getElementById('bk-next-btn'));
+}
+
+function updateSeatDisplay(nextBtn) {
+  const s = state.bk.seat;
+  if (!s) return;
+  const price = s.class === 'business' ? state.bk.flight.basePrice * 2 : state.bk.flight.basePrice;
+  const valEl   = document.getElementById('seat-selected-val');
+  const priceEl = document.getElementById('seat-price-val');
+  if (valEl)   valEl.style.color   = 'var(--ok)';
+  if (valEl)   valEl.textContent   = `${s.seatNumber} · ${s.class}`;
+  if (priceEl) priceEl.style.color = 'var(--accent)';
+  if (priceEl) priceEl.textContent = `₱${price.toLocaleString()}`;
+  document.getElementById('bk-footer-info').innerHTML = `Seat: <strong>${s.seatNumber}</strong>`;
+  nextBtn.disabled = false;
+}
+
+/* ── Step 2: Passenger ── */
+async function renderStep2Passenger(body, nextBtn) {
+  body.innerHTML = `<div class="empty-state"><span class="spinner"></span> Loading passengers…</div>`;
+  nextBtn.textContent = 'Continue →';
+  nextBtn.disabled = false;
+
+  let saved = [];
+  try {
+    const res = await api('GET', '/passengers/user/my-passengers');
+    saved = res.passengers || [];
+  } catch(e) {}
+
+  renderPassengerUI(body, saved);
+  updatePassengerFooter();
+}
+
+function renderPassengerUI(body, saved) {
+  const hasSaved = saved.length > 0;
+
+  // If no saved profiles the "new" tab is the default — mark it explicitly
+  if (!hasSaved) {
+    state.bk.isNewPax = true;
+    state.bk.passenger = null;
+  }
+
+  body.innerHTML = `
+    <div class="pax-step-wrap">
+      <div class="pax-tabs">
+        <button class="pax-tab ${hasSaved ? 'active' : ''}" onclick="switchPaxTab('saved')" id="pax-tab-saved" ${!hasSaved ? 'disabled style="opacity:.4"' : ''}>Saved Profiles</button>
+        <button class="pax-tab ${!hasSaved ? 'active' : ''}" onclick="switchPaxTab('new')" id="pax-tab-new">New Passenger</button>
+      </div>
+      <div id="pax-saved-panel" style="display:${hasSaved ? '' : 'none'}">
+        ${hasSaved ? `<div class="saved-pax-list">
+          ${saved.map(p => `
+            <div class="saved-pax-card ${state.bk.passenger?.id === p._id ? 'selected' : ''}"
+                 id="spc-${p._id}" onclick="selectSavedPax(${JSON.stringify(p).replace(/"/g, '&quot;')})">
+              <div class="spc-radio"></div>
+              <div class="spc-info">
+                <div class="spc-name">${p.firstName} ${p.lastName}</div>
+                <div class="spc-meta">${p.passportNumber} · ${p.nationality} · ${p.phone}</div>
+              </div>
+            </div>`).join('')}
+        </div>` : '<div class="empty-state">No saved passengers found.</div>'}
+      </div>
+      <div id="pax-new-panel" class="new-pax-form" style="display:${!hasSaved ? '' : 'none'}">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input id="np-first" type="text" placeholder="Juan" /></div>
+          <div class="form-group"><label>Last Name</label><input id="np-last" type="text" placeholder="dela Cruz" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Gender</label>
+            <select id="np-gender"><option value="">— Select —</option><option value="Male">Male</option><option value="Female">Female</option></select>
+          </div>
+          <div class="form-group"><label>Date of Birth</label><input id="np-dob" type="date" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Nationality</label><input id="np-nat" type="text" placeholder="Filipino" /></div>
+          <div class="form-group"><label>Phone (11 digits)</label><input id="np-phone" type="text" placeholder="09XXXXXXXXX" maxlength="11" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Passport Number</label><input id="np-passport" type="text" placeholder="P1234567A" /></div>
+          <div class="form-group"><label>Passport Expiry</label><input id="np-expiry" type="date" /></div>
+        </div>
+      </div>
+    </div>`;
+
+  // If already selected a saved passenger, mark it
+  if (state.bk.passenger?.id) {
+    const card = document.getElementById(`spc-${state.bk.passenger.id}`);
+    if (card) card.classList.add('selected');
+  }
+}
+
+window.switchPaxTab = function(tab) {
+  document.getElementById('pax-saved-panel').style.display = tab === 'saved' ? '' : 'none';
+  document.getElementById('pax-new-panel').style.display   = tab === 'new'   ? '' : 'none';
+  document.getElementById('pax-tab-saved').classList.toggle('active', tab === 'saved');
+  document.getElementById('pax-tab-new').classList.toggle('active', tab === 'new');
+  state.bk.isNewPax = tab === 'new';
+  if (tab === 'new') state.bk.passenger = null;
+  updatePassengerFooter();
+};
+
+window.selectSavedPax = function(p) {
+  document.querySelectorAll('.saved-pax-card').forEach(el => el.classList.remove('selected'));
+  document.getElementById(`spc-${p._id}`)?.classList.add('selected');
+  state.bk.passenger = { id: p._id, firstName: p.firstName, lastName: p.lastName };
+  state.bk.isNewPax  = false;
+  updatePassengerFooter();
+};
+
+function updatePassengerFooter() {
+  const p = state.bk.passenger;
+  const info = document.getElementById('bk-footer-info');
+  if (info) info.innerHTML = p ? `Passenger: <strong>${p.firstName} ${p.lastName}</strong>` : '';
+}
+
+/* ── Step 3: Review & Pay ── */
+function renderStep3Review(body, nextBtn) {
+  const f = state.bk.flight;
+  const s = state.bk.seat;
+  const p = state.bk.passenger;
+  const price = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+
+  nextBtn.textContent = `✈ Pay ₱${price?.toLocaleString()} →`;
+  nextBtn.disabled = false;
+
+  const methods = [
+    { val:'credit_card', icon:'💳', label:'Credit Card' },
+    { val:'debit_card',  icon:'💳', label:'Debit Card' },
+    { val:'gcash',       icon:'📱', label:'GCash' },
+    { val:'cash',        icon:'💵', label:'Cash' },
+  ];
+
+  body.innerHTML = `
+    <div class="review-wrap">
+      <div class="review-card">
+        <div class="review-card-header">✈ Flight Details</div>
+        <div class="review-card-body">
+          <div class="review-field"><span class="rf-label">Flight</span><span class="rf-value">${f.flightNumber}</span></div>
+          <div class="review-field"><span class="rf-label">Route</span><span class="rf-value">${getAirportName(f.originAirportId)} → ${getAirportName(f.destinationAirportId)}</span></div>
+          <div class="review-field"><span class="rf-label">Departure</span><span class="rf-value">${fmtDateTime(f.departureTime)}</span></div>
+          <div class="review-field"><span class="rf-label">Arrival</span><span class="rf-value">${fmtDateTime(f.arrivalTime)}</span></div>
+          <div class="review-field"><span class="rf-label">Status</span><span class="rf-value">${statusPill(f.status)}</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-card-header">💺 Seat</div>
+        <div class="review-card-body">
+          <div class="review-field"><span class="rf-label">Seat Number</span><span class="rf-value">${s?.seatNumber || '—'}</span></div>
+          <div class="review-field"><span class="rf-label">Class</span><span class="rf-value" style="text-transform:capitalize">${s?.class || '—'}</span></div>
+          <div class="review-field"><span class="rf-label">Price</span><span class="rf-value accent">₱${price?.toLocaleString()}</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-card-header">👤 Passenger</div>
+        <div class="review-card-body">
+          <div class="review-field"><span class="rf-label">Name</span><span class="rf-value">${p?.firstName} ${p?.lastName}</span></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-card-header">💳 Payment Method</div>
+        <div class="review-card-body">
+          <div class="pay-methods">
+            ${methods.map(m => `
+              <label class="pay-method-opt ${state.bk.paymentMethod === m.val ? 'selected' : ''}" onclick="selectPayMethod('${m.val}')">
+                <input type="radio" name="paymethod" value="${m.val}" ${state.bk.paymentMethod === m.val ? 'checked' : ''}>
+                <span class="pay-method-icon">${m.icon}</span>
+                <span class="pay-method-label">${m.label}</span>
+              </label>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div id="review-err" style="font-size:13px;color:var(--err);display:none;font-family:var(--font-mono)"></div>
+    </div>`;
+
+  document.getElementById('bk-footer-info').innerHTML = `Total: <strong>₱${price?.toLocaleString()}</strong>`;
+}
+
+window.selectPayMethod = function(val) {
+  state.bk.paymentMethod = val;
+  document.querySelectorAll('.pay-method-opt').forEach(el => {
+    el.classList.toggle('selected', el.querySelector('input').value === val);
+  });
+};
+
+/* ── Submit Booking ── */
+async function submitBooking() {
+  const next = document.getElementById('bk-next-btn');
+  const errEl = document.getElementById('review-err');
+  if (errEl) errEl.style.display = 'none';
+  next.disabled = true;
+  next.textContent = '⏳ Processing…';
+
+  const f     = state.bk.flight;
+  const s     = state.bk.seat;
+  const price = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+
+  try {
+    // 1. Create passenger if new
+    let passengerId = state.bk.passenger?.id;
+    if (state.bk.isNewPax || !passengerId) {
+      const paxPayload = state.bk.newPaxData;
+      if (!paxPayload) {
+        throw { data: { message: 'Passenger data is missing. Please go back and fill in passenger details.' } };
+      }
+      const np = await api('POST', '/passengers/user/create-passenger', paxPayload);
+      passengerId = np.result._id;
+      // Store full name so confirmation screen can display it correctly
+      state.bk.passenger = {
+        id: passengerId,
+        firstName: paxPayload.firstName,
+        lastName:  paxPayload.lastName
+      };
+    }
+
+    // 2. Create booking
+    const bkRes = await api('POST', '/bookings/user/create-booking', {
+      flightId: f._id,
+      totalAmount: price
+    });
+    const bookingId = bkRes.bookingId;
+    state.bk.bookingId = bookingId;
+
+    // 3. Create booking passenger (claim seat)
+    const bkpRes = await api('POST', '/bookingpassengers/create-booking-passenger', {
+      bookingId,
+      passengerId,
+      seatId: s._id
+    });
+    state.bk.ticketNumber = bkpRes.result?.ticketNumber;
+
+    // 4. Create payment (auto-confirms booking)
+    try {
+      await api('POST', '/payments/user/create-payment', {
+        bookingId,
+        paymentMethod: state.bk.paymentMethod,
+        amount: price
+      });
+    } catch(payErr) {
+      // Payment failed — roll back seat claim and cancel booking so the user
+      // isn't left with a ghost pending booking and an occupied seat they can't use.
+      try {
+        if (bkpRes?.result?._id) {
+          await api('PATCH', `/bookingpassengers/deactivate-booking-passenger/${bkpRes.result._id}`);
+        }
+      } catch(_) {}
+      try {
+        await api('PATCH', `/bookings/user/cancel-booking/${bkRes.bookingReference}`);
+      } catch(_) {}
+      throw payErr; // re-throw so the outer catch shows the error to the user
+    }
+
+    state.bk.bookingRef = bkRes.bookingReference;
+
+    // Show confirmation
+    renderConfirmation();
+    loadNotifBadge();
+  } catch(e) {
+    next.disabled = false;
+    const p = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+    next.textContent = `✈ Pay ₱${p?.toLocaleString()} →`;
+    const msg = e.data?.message || 'Booking failed. Please try again.';
+    if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
+    toast(msg, 'err');
+  }
+}
+
+/* ── Confirmation ── */
+function renderConfirmation() {
+  const f = state.bk.flight;
+  const s = state.bk.seat;
+  const p = state.bk.passenger;
+  const price = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+
+  // Hide footer navigation for confirmation
+  document.getElementById('bk-footer-info').innerHTML = '';
+  document.getElementById('bk-back-btn').style.display = 'none';
+  document.getElementById('bk-next-btn').style.display = 'none';
+
+  // Update step indicator all done
+  state.bk.step = 4;
+  renderStepIndicator();
+
+  document.getElementById('bk-body').innerHTML = `
+    <div class="confirm-wrap">
+      <div class="confirm-icon">✓</div>
+      <div class="confirm-title">Booking Confirmed!</div>
+      <div class="confirm-sub">Your seat is reserved. Check your notifications for details.</div>
+      <div class="confirm-ref">${state.bk.bookingRef || '—'}</div>
+      <div class="confirm-ticket">Ticket: ${state.bk.ticketNumber || '—'}</div>
+      <div class="confirm-details">
+        <div class="cd-row"><span class="cd-label">Flight</span><span class="cd-val">${f.flightNumber}</span></div>
+        <div class="cd-row"><span class="cd-label">Route</span><span class="cd-val">${getAirportName(f.originAirportId)} → ${getAirportName(f.destinationAirportId)}</span></div>
+        <div class="cd-row"><span class="cd-label">Departure</span><span class="cd-val">${fmtDateTime(f.departureTime)}</span></div>
+        <div class="cd-row"><span class="cd-label">Seat</span><span class="cd-val">${s?.seatNumber} (${s?.class})</span></div>
+        <div class="cd-row"><span class="cd-label">Passenger</span><span class="cd-val">${p?.firstName} ${p?.lastName}</span></div>
+        <div class="cd-row"><span class="cd-label">Amount Paid</span><span class="cd-val" style="color:var(--accent);font-weight:700">₱${price?.toLocaleString()}</span></div>
+        <div class="cd-row"><span class="cd-label">Status</span><span class="cd-val">${statusPill('confirmed')}</span></div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-ghost" onclick="closeBooking();showSection('my-bookings')">View My Bookings</button>
+        <button class="btn-primary" onclick="closeBooking();showSection('my-itineraries')">Create Itinerary</button>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════
+   SECTION: MY BOOKINGS
+═══════════════════════════════════════ */
+async function renderMyBookings(ca) {
+  ca.innerHTML = `<div class="section-wrap">
+    <div class="section-header">
+      <div class="section-title">My Bookings</div>
+      <div class="section-sub">All your flight reservations</div>
+    </div>
+    <div id="bookings-content"><div class="empty-state"><span class="spinner"></span></div></div>
+  </div>`;
+
+  try {
+    const res = await api('GET', '/bookings/user/my-bookings');
+    const bookings = res.bookings || [];
+    if (!bookings.length) {
+      document.getElementById('bookings-content').innerHTML = `
+        <div class="empty-state"><span class="empty-icon">✈</span>No bookings yet. <a onclick="showSection('search')" style="color:var(--accent);cursor:pointer">Search for flights →</a></div>`;
+      return;
+    }
+
+    // Fetch flight details for each booking
+    const flights = {};
+    await Promise.all([...new Set(bookings.map(b => b.flightId))].map(async id => {
+      try { const r = await api('GET', `/flights/get-flight/${id}`, null, true); flights[id] = r.result; } catch(e) {}
+    }));
+
+    document.getElementById('bookings-content').innerHTML = `
+      <div class="bookings-grid">
+        ${bookings.map(b => {
+          const f = flights[b.flightId];
+          return `
+            <div class="booking-card">
+              <div class="bc-main">
+                <div class="bc-ref">${b.bookingReference}</div>
+                <div class="bc-flight">${f ? f.flightNumber : 'Flight'} · ${getAirportName(b.flightId)}</div>
+                <div class="bc-meta">
+                  ${f ? `${getAirportName(f.originAirportId)} → ${getAirportName(f.destinationAirportId)} · ${fmtDateTime(f.departureTime)}` : '—'}
+                </div>
+                <div style="margin-top:4px">${statusPill(b.status)}</div>
+              </div>
+              <div class="bc-side">
+                <div class="bc-amount">₱${b.totalAmount?.toLocaleString()}</div>
+                <div class="bc-actions">
+                  ${(b.status === 'pending' || b.status === 'confirmed')
+                    ? `<button class="btn btn-sm btn-del" onclick="cancelBooking('${b.bookingReference}')">Cancel</button>`
+                    : ''}
+                </div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>`;
+  } catch(e) {
+    document.getElementById('bookings-content').innerHTML = `<div class="empty-state">${e.data?.message || 'Failed to load bookings'}</div>`;
+  }
+}
+
+window.cancelBooking = async function(ref) {
+  if (!confirm(`Cancel booking ${ref}? This cannot be undone.`)) return;
+  try {
+    await api('PATCH', `/bookings/user/cancel-booking/${ref}`);
+    toast('Booking cancelled', 'ok');
+    showSection('my-bookings');
+  } catch(e) { toast(e.data?.message || 'Failed to cancel', 'err'); }
+};
+
+/* ═══════════════════════════════════════
+   SECTION: MY PASSENGERS
+═══════════════════════════════════════ */
+async function renderMyPassengers(ca) {
+  ca.innerHTML = `<div class="section-wrap">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="section-title">My Passengers</div>
+        <div class="section-sub">Saved traveller profiles</div>
+      </div>
+      <button class="btn btn-create" onclick="addPassengerModal()">+ Add Passenger</button>
+    </div>
+    <div id="pax-content"><div class="empty-state"><span class="spinner"></span></div></div>
+  </div>`;
+
+  await loadPassengersContent();
+}
+
+async function loadPassengersContent() {
+  const el = document.getElementById('pax-content');
+  if (!el) return;
+  try {
+    const res = await api('GET', '/passengers/user/my-passengers');
+    const pax = res.passengers || [];
+    if (!pax.length) {
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">👥</span>No saved passengers. Add one to speed up future bookings.</div>`;
+      return;
+    }
+    el.innerHTML = `<div class="pax-grid">
+      ${pax.map(p => `
+        <div class="pax-card">
+          <div class="pc-avatar">${p.gender === 'Male' ? '👨' : '👩'}</div>
+          <div class="pc-name">${p.firstName} ${p.lastName}</div>
+          <div class="pc-field">📛 ${p.passportNumber}</div>
+          <div class="pc-field">🌍 ${p.nationality}</div>
+          <div class="pc-field">📞 ${p.phone}</div>
+          <div class="pc-field">✉️ ${p.email || '—'}</div>
+          <div class="pc-actions">
+            <button class="btn btn-sm" onclick="editPassengerModal('${p._id}',${JSON.stringify(p).replace(/"/g,'&quot;')})">✏ Edit</button>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state">${e.data?.message || 'Failed to load'}</div>`;
+  }
+}
+
+window.addPassengerModal = function() {
+  showModal(`
+    <h3>Add Passenger Profile</h3>
+    <div class="modal-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>First Name</label><input id="ap-first" type="text" /></div>
+        <div class="form-group"><label>Last Name</label><input id="ap-last" type="text" /></div>
+        <div class="form-group"><label>Gender</label><select id="ap-gender"><option value="">—</option><option value="Male">Male</option><option value="Female">Female</option></select></div>
+        <div class="form-group"><label>Date of Birth</label><input id="ap-dob" type="date" /></div>
+        <div class="form-group"><label>Nationality</label><input id="ap-nat" type="text" /></div>
+        <div class="form-group"><label>Phone</label><input id="ap-phone" type="text" maxlength="11" /></div>
+        <div class="form-group"><label>Passport Number</label><input id="ap-passport" type="text" /></div>
+        <div class="form-group"><label>Passport Expiry</label><input id="ap-expiry" type="date" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-create" onclick="submitAddPassenger()">Save Profile</button>
+      </div>
+    </div>`);
+};
+
+window.submitAddPassenger = async function() {
+  try {
+    await api('POST', '/passengers/user/create-passenger', {
+      firstName:      document.getElementById('ap-first').value.trim(),
+      lastName:       document.getElementById('ap-last').value.trim(),
+      gender:         document.getElementById('ap-gender').value,
+      dateOfBirth:    document.getElementById('ap-dob').value,
+      nationality:    document.getElementById('ap-nat').value.trim(),
+      phone:          document.getElementById('ap-phone').value.trim(),
+      passportNumber: document.getElementById('ap-passport').value.trim(),
+      passportExpiry: document.getElementById('ap-expiry').value,
+    });
+    toast('Passenger saved', 'ok');
+    closeModal();
+    await loadPassengersContent();
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+window.editPassengerModal = function(id, p) {
+  showModal(`
+    <h3>Edit Passenger</h3>
+    <div class="modal-form">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="form-group"><label>First Name</label><input id="ep-first" type="text" value="${p.firstName||''}" /></div>
+        <div class="form-group"><label>Last Name</label><input id="ep-last" type="text" value="${p.lastName||''}" /></div>
+        <div class="form-group"><label>Gender</label><select id="ep-gender"><option value="">—</option><option value="Male" ${p.gender==='Male'?'selected':''}>Male</option><option value="Female" ${p.gender==='Female'?'selected':''}>Female</option></select></div>
+        <div class="form-group"><label>Phone</label><input id="ep-phone" type="text" value="${p.phone||''}" maxlength="11" /></div>
+        <div class="form-group"><label>Nationality</label><input id="ep-nat" type="text" value="${p.nationality||''}" /></div>
+        <div class="form-group"><label>Passport Expiry</label><input id="ep-expiry" type="date" value="${p.passportExpiry?.split('T')[0]||''}" /></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-create" onclick="submitEditPassenger('${id}')">Save</button>
+      </div>
+    </div>`);
+};
+
+window.submitEditPassenger = async function(id) {
+  try {
+    await api('PATCH', `/passengers/user/update-passenger/${id}`, {
+      firstName:      document.getElementById('ep-first').value.trim(),
+      lastName:       document.getElementById('ep-last').value.trim(),
+      gender:         document.getElementById('ep-gender').value,
+      nationality:    document.getElementById('ep-nat').value.trim(),
+      phone:          document.getElementById('ep-phone').value.trim(),
+      passportExpiry: document.getElementById('ep-expiry').value,
+    });
+    toast('Passenger updated', 'ok');
+    closeModal();
+    await loadPassengersContent();
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+/* ═══════════════════════════════════════
+   SECTION: MY PAYMENTS
+═══════════════════════════════════════ */
+async function renderMyPayments(ca) {
+  ca.innerHTML = `<div class="section-wrap">
+    <div class="section-header"><div class="section-title">My Payments</div><div class="section-sub">Your transaction history</div></div>
+    <div id="pay-content"><div class="empty-state"><span class="spinner"></span></div></div>
+  </div>`;
+
+  try {
+    const res = await api('GET', '/payments/user/my-payments');
+    const payments = res.payments || [];
+    if (!payments.length) {
+      document.getElementById('pay-content').innerHTML = `<div class="empty-state"><span class="empty-icon">💳</span>No payments yet.</div>`;
+      return;
+    }
+    const methodIcon = { credit_card:'💳', debit_card:'💳', gcash:'📱', cash:'💵' };
+    document.getElementById('pay-content').innerHTML = `<div class="payment-list">
+      ${payments.map(p => `
+        <div class="payment-item">
+          <div>
+            <div class="pi-txn">${p.transactionId || '—'}</div>
+            <div class="pi-method">${methodIcon[p.paymentMethod] || ''} ${p.paymentMethod?.replace('_',' ')}</div>
+          </div>
+          <div class="pi-date">${fmtDateTime(p.paidAt || p.createdAt)}</div>
+          <div>
+            <div class="pi-amount">₱${p.amount?.toLocaleString()}</div>
+            <div style="text-align:right;margin-top:4px">${statusPill(p.status)}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+  } catch(e) {
+    document.getElementById('pay-content').innerHTML = `<div class="empty-state">${e.data?.message || 'Failed to load'}</div>`;
+  }
+}
+
+/* ═══════════════════════════════════════
+   SECTION: MY ITINERARIES
+═══════════════════════════════════════ */
+async function renderMyItineraries(ca) {
+  ca.innerHTML = `<div class="section-wrap">
+    <div class="section-header" style="display:flex;align-items:center;justify-content:space-between">
+      <div><div class="section-title">My Itineraries</div><div class="section-sub">Your planned journeys</div></div>
+      <button class="btn btn-create" onclick="createItineraryModal()">+ New Itinerary</button>
+    </div>
+    <div id="itin-content"><div class="empty-state"><span class="spinner"></span></div></div>
+  </div>`;
+
+  await loadItinerariesContent();
+}
+
+async function loadItinerariesContent() {
+  const el = document.getElementById('itin-content');
+  if (!el) return;
+  try {
+    const res = await api('GET', '/itineraries/my-itineraries');
+    const itins = res.result || [];
+    if (!itins.length) {
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">🗺</span>No itineraries yet. Create one from your confirmed bookings.</div>`;
+      return;
+    }
+    el.innerHTML = `<div class="itin-grid">
+      ${itins.map(it => `
+        <div class="itin-card">
+          <div class="itin-card-header">
+            <div class="ic-id">Itinerary · ${it._id.slice(-8)}</div>
+            <div class="ic-count">${it.bookings.length} segment${it.bookings.length !== 1 ? 's' : ''} · ${shortDate(it.createdAt)}</div>
+          </div>
+          <div class="itin-segments">
+            ${it.bookings.map(seg => `
+              <div class="itin-seg">
+                <div class="itin-seg-type ${seg.type}">${seg.type}</div>
+                <div class="itin-seg-ref">Booking · ${typeof seg.bookingId === 'object' ? seg.bookingId?.bookingReference || seg.bookingId?._id?.slice(-8) : seg.bookingId?.slice(-8)}</div>
+                ${seg.gate ? `<div style="font-size:12px;color:var(--muted)">Gate ${seg.gate}</div>` : ''}
+              </div>`).join('')}
+          </div>
+          <div class="itin-card-footer">
+            <button class="btn btn-sm" onclick="addBookingToItinModal('${it._id}')">+ Add Booking</button>
+            ${it.bookings.length > 1 ? `<button class="btn btn-sm btn-del" onclick="removeBookingModal('${it._id}',${JSON.stringify(it.bookings).replace(/"/g,'&quot;')})">− Remove</button>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state">${e.data?.message || 'Failed to load itineraries'}</div>`;
+  }
+}
+
+window.createItineraryModal = async function() {
+  // Fetch confirmed bookings
+  let bookings = [];
+  try {
+    const res = await api('GET', '/bookings/user/my-bookings');
+    bookings = (res.bookings || []).filter(b => b.status === 'confirmed' && b.isActive);
+  } catch(e) {}
+
+  if (!bookings.length) { toast('No confirmed bookings to add to an itinerary', 'err'); return; }
+
+  showModal(`
+    <h3>Create New Itinerary</h3>
+    <div class="modal-form">
+      <div class="form-group"><label>Select Booking</label>
+        <select id="ci-booking">
+          ${bookings.map(b => `<option value="${b._id}">${b.bookingReference} · ₱${b.totalAmount?.toLocaleString()}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label>Flight Type</label>
+        <select id="ci-type"><option value="outbound">Outbound</option><option value="return">Return</option><option value="layover">Layover</option></select>
+      </div>
+      <div class="form-group"><label>Gate (optional)</label><input id="ci-gate" type="text" placeholder="e.g. G14" /></div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-create" onclick="submitCreateItinerary()">Create</button>
+      </div>
+    </div>`);
+};
+
+window.submitCreateItinerary = async function() {
+  try {
+    const bookingId = document.getElementById('ci-booking').value;
+    const type  = document.getElementById('ci-type').value;
+    const gate  = document.getElementById('ci-gate').value.trim() || null;
+    await api('POST', '/itineraries/create-itinerary', { bookings: [{ bookingId, type, gate }] });
+    toast('Itinerary created', 'ok');
+    closeModal();
+    await loadItinerariesContent();
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+window.addBookingToItinModal = async function(itinId) {
+  let bookings = [];
+  try {
+    const res = await api('GET', '/bookings/user/my-bookings');
+    bookings = (res.bookings || []).filter(b => b.status === 'confirmed' && b.isActive);
+  } catch(e) {}
+
+  if (!bookings.length) { toast('No confirmed bookings available', 'err'); return; }
+
+  showModal(`
+    <h3>Add Booking to Itinerary</h3>
+    <div class="modal-form">
+      <div class="form-group"><label>Booking</label>
+        <select id="abi-booking">${bookings.map(b => `<option value="${b._id}">${b.bookingReference}</option>`).join('')}</select>
+      </div>
+      <div class="form-group"><label>Type</label>
+        <select id="abi-type"><option value="outbound">Outbound</option><option value="return">Return</option><option value="layover">Layover</option></select>
+      </div>
+      <div class="form-group"><label>Gate (optional)</label><input id="abi-gate" type="text" /></div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-create" onclick="submitAddToItin('${itinId}')">Add</button>
+      </div>
+    </div>`);
+};
+
+window.submitAddToItin = async function(itinId) {
+  try {
+    await api('PATCH', `/itineraries/add-booking/${itinId}`, {
+      bookingId: document.getElementById('abi-booking').value,
+      type: document.getElementById('abi-type').value,
+      gate: document.getElementById('abi-gate').value.trim() || null
+    });
+    toast('Booking added to itinerary', 'ok');
+    closeModal();
+    await loadItinerariesContent();
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+window.removeBookingModal = function(itinId, segments) {
+  showModal(`
+    <h3>Remove Booking from Itinerary</h3>
+    <div class="modal-form">
+      <div class="form-group"><label>Select Booking to Remove</label>
+        <select id="rb-booking">
+          ${segments.map(seg => `<option value="${typeof seg.bookingId === 'object' ? seg.bookingId._id : seg.bookingId}">${seg.type} · ${typeof seg.bookingId === 'object' ? seg.bookingId.bookingReference || seg.bookingId._id?.slice(-8) : seg.bookingId?.slice(-8)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-del" onclick="submitRemoveFromItin('${itinId}')">Remove</button>
+      </div>
+    </div>`);
+};
+
+window.submitRemoveFromItin = async function(itinId) {
+  try {
+    await api('PATCH', `/itineraries/remove-booking/${itinId}`, { bookingId: document.getElementById('rb-booking').value });
+    toast('Booking removed', 'ok');
+    closeModal();
+    await loadItinerariesContent();
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+/* ═══════════════════════════════════════
+   SECTION: NOTIFICATIONS
+═══════════════════════════════════════ */
+async function renderNotifications(ca) {
+  ca.innerHTML = `<div class="section-wrap">
+    <div class="notif-toolbar">
+      <div><div class="section-title" style="font-size:24px">Notifications</div></div>
+      <button class="btn btn-sm" onclick="markAllRead()">✓ Mark all as read</button>
+    </div>
+    <div id="notif-content"><div class="empty-state"><span class="spinner"></span></div></div>
+  </div>`;
+
+  await loadNotifContent();
+}
+
+async function loadNotifContent() {
+  const el = document.getElementById('notif-content');
+  if (!el) return;
+  try {
+    const res = await api('GET', '/notifications/my-notifications');
+    const notifs = res.result || [];
+    if (!notifs.length) {
+      el.innerHTML = `<div class="empty-state"><span class="empty-icon">🔔</span>No notifications yet.</div>`;
+      return;
+    }
+    const icons = { booking_confirmed:'✅', flight_status_change:'✈', itinerary_created:'🗺' };
+    el.innerHTML = `<div class="notif-list">
+      ${notifs.map(n => `
+        <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="markRead('${n._id}')">
+          <div class="notif-icon ${n.type}">${icons[n.type] || '🔔'}</div>
+          <div>
+            <div class="notif-msg">${n.message}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--font-mono)">${fmtDateTime(n.createdAt)}</div>
+          </div>
+          ${!n.isRead ? '<div class="notif-unread-dot"></div>' : '<div></div>'}
+        </div>`).join('')}
+    </div>`;
+  } catch(e) {
+    el.innerHTML = `<div class="empty-state">${e.data?.message || 'Failed to load'}</div>`;
+  }
+}
+
+window.markRead = async function(id) {
+  try {
+    await api('PATCH', `/notifications/mark-as-read/${id}`);
+    await loadNotifContent();
+    loadNotifBadge();
+  } catch(e) {}
+};
+
+window.markAllRead = async function() {
+  try {
+    await api('PATCH', '/notifications/mark-all-as-read');
+    toast('All marked as read', 'ok');
+    await loadNotifContent();
+    loadNotifBadge();
+  } catch(e) { toast('Failed', 'err'); }
+};
+
+/* ═══════════════════════════════════════
+   SECTION: PROFILE
+═══════════════════════════════════════ */
+async function renderProfile(ca) {
+  const u = state.user || {};
+  const initials = (u.firstName?.[0] || '') + (u.lastName?.[0] || '');
+
+  ca.innerHTML = `<div class="section-wrap">
+    <div class="profile-layout">
+      <div class="profile-sidebar">
+        <div class="profile-card">
+          <div class="profile-avatar">${initials.toUpperCase() || '?'}</div>
+          <div class="profile-name">${u.firstName || ''} ${u.lastName || ''}</div>
+          <div class="profile-email">${u.email || ''}</div>
+          <div class="profile-badge">${u.isAdmin ? '⭐ Admin' : '✈ Traveller'}</div>
+        </div>
+        <div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--rmd);padding:14px 16px;">
+          <div style="font-size:12px;color:var(--muted2);font-family:var(--font-mono);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Quick Nav</div>
+          ${[['search','🔍 Search Flights'],['my-bookings','✈ My Bookings'],['my-passengers','👥 My Passengers'],['my-payments','💳 My Payments'],['my-itineraries','🗺 My Itineraries'],['notifications','🔔 Notifications']]
+            .map(([id,label]) => `<a onclick="showSection('${id}')" style="display:block;padding:8px 10px;font-size:13.5px;color:var(--muted2);border-radius:var(--r);transition:all .2s;cursor:pointer" onmouseover="this.style.background='var(--surf2)';this.style.color='var(--text)'" onmouseout="this.style.background='';this.style.color='var(--muted2)'">${label}</a>`).join('')}
+        </div>
+      </div>
+      <div class="profile-settings">
+        <!-- Personal Info -->
+        <div class="settings-card">
+          <div class="settings-card-header">👤 Personal Information</div>
+          <div class="settings-card-body">
+            <div class="settings-form">
+              <div class="settings-row">
+                <div class="form-group"><label>First Name</label><input id="pf-first" type="text" value="${u.firstName||''}" /></div>
+                <div class="form-group"><label>Last Name</label><input id="pf-last" type="text" value="${u.lastName||''}" /></div>
+              </div>
+              <div class="settings-row">
+                <div class="form-group"><label>Gender</label>
+                  <select id="pf-gender">
+                    <option value="">—</option>
+                    <option value="Male" ${u.gender==='Male'?'selected':''}>Male</option>
+                    <option value="Female" ${u.gender==='Female'?'selected':''}>Female</option>
+                  </select>
+                </div>
+                <div class="form-group"><label>Phone</label><input id="pf-phone" type="text" value="${u.phone||''}" maxlength="11" /></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end">
+                <button class="btn btn-create" onclick="updateProfile()">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Email -->
+        <div class="settings-card">
+          <div class="settings-card-header">✉️ Email Address</div>
+          <div class="settings-card-body">
+            <div class="settings-form">
+              <div class="form-group"><label>New Email</label><input id="pf-email" type="email" value="${u.email||''}" /></div>
+              <div style="display:flex;justify-content:flex-end">
+                <button class="btn btn-create" onclick="updateEmail()">Update Email</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Password -->
+        <div class="settings-card">
+          <div class="settings-card-header">🔒 Change Password</div>
+          <div class="settings-card-body">
+            <div class="settings-form">
+              <div class="form-group"><label>Current Password</label><input id="pf-oldpass" type="password" placeholder="••••••••" /></div>
+              <div class="settings-row">
+                <div class="form-group"><label>New Password</label><input id="pf-newpass" type="password" placeholder="••••••••" /></div>
+                <div class="form-group"><label>Confirm</label><input id="pf-confirm" type="password" placeholder="••••••••" /></div>
+              </div>
+              <div id="pass-err" style="font-size:12.5px;color:var(--err);display:none;font-family:var(--font-mono)"></div>
+              <div style="display:flex;justify-content:flex-end">
+                <button class="btn btn-create" onclick="updatePassword()">Change Password</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+window.updateProfile = async function() {
+  try {
+    const res = await api('PATCH', '/users/update-profile', {
+      firstName: document.getElementById('pf-first').value.trim(),
+      lastName:  document.getElementById('pf-last').value.trim(),
+      gender:    document.getElementById('pf-gender').value,
+      phone:     document.getElementById('pf-phone').value.trim(),
+    });
+    state.user = res.result || state.user;
+    document.getElementById('user-name-display').textContent = state.user.firstName || 'User';
+    document.getElementById('user-initials').textContent = ((state.user.firstName?.[0]||'') + (state.user.lastName?.[0]||'')).toUpperCase();
+    toast('Profile updated', 'ok');
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+window.updateEmail = async function() {
+  try {
+    await api('PATCH', '/users/update-email', { email: document.getElementById('pf-email').value.trim() });
+    toast('Email updated', 'ok');
+    if (state.user) state.user.email = document.getElementById('pf-email').value.trim();
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+window.updatePassword = async function() {
+  const errEl = document.getElementById('pass-err');
+  errEl.style.display = 'none';
+  const np = document.getElementById('pf-newpass').value;
+  const cf = document.getElementById('pf-confirm').value;
+  if (np !== cf) { errEl.textContent = 'Passwords do not match'; errEl.style.display = 'block'; return; }
+  if (np.length < 8) { errEl.textContent = 'Password must be at least 8 characters'; errEl.style.display = 'block'; return; }
+  try {
+    await api('PATCH', '/users/update-password', {
+      oldPassword: document.getElementById('pf-oldpass').value,
+      newPassword: np
+    });
+    toast('Password changed successfully', 'ok');
+    document.getElementById('pf-oldpass').value = '';
+    document.getElementById('pf-newpass').value = '';
+    document.getElementById('pf-confirm').value = '';
+  } catch(e) { toast(e.data?.message || 'Failed', 'err'); }
+};
+
+/* ═══════════════════════════════════════
+   STARTUP
+═══════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', async () => {
+  const saved = sessionStorage.getItem('token');
+  if (saved) {
+    state.token = saved;
+    await initApp();
+  }
+
+  // Load airports in background even without login (for search)
+  try {
+    const res = await api('GET', '/airports/get-all-airports', null, true);
+    state.airports = res.result || [];
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
