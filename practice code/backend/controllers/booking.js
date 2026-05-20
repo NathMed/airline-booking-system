@@ -1,18 +1,20 @@
 const Booking = require("../models/Booking");
 const Flight = require("../models/Flight");
+const Seat = require("../models/Seat");
+const BookingPassenger = require("../models/BookingPassenger");
 const { errorHandler } = require("../auth");
 const { createNotification } = require("./notification");
 
 // USER LEVEL ACCESS
 
 module.exports.createBookingUser = (req, res) => {
-    const { flightId, totalAmount } = req.body;
+    const { flightId, seatId } = req.body;
 
     if (!flightId) {
         return res.status(400).send({ message: "Flight ID is required" });
     }
-    if (!totalAmount) {
-        return res.status(400).send({ message: "Total Amount is required" });
+    if (!seatId) {
+        return res.status(400).send({ message: "Seat ID is required" });
     }
 
     return Flight.findById(flightId)
@@ -24,28 +26,45 @@ module.exports.createBookingUser = (req, res) => {
                 return res.status(400).send({ message: "Cannot book an inactive flight" });
             }
 
-            const bookingReference = "F606-" + Date.now();
-
-            return Booking.findOne({ bookingReference })
-                .then(existingBooking => {
-                    if (existingBooking) {
-                        return res.status(409).send({ message: "Booking Reference already exists" });
+            return Seat.findById(seatId)
+                .then(seat => {
+                    if (!seat) {
+                        return res.status(404).send({ message: "Seat not found" });
+                    }
+                    if (String(seat.flightId) !== String(flightId)) {
+                        return res.status(400).send({ message: "Seat does not belong to this flight" });
+                    }
+                    if (!seat.isActive) {
+                        return res.status(400).send({ message: "Seat is not available" });
+                    }
+                    if (seat.isOccupied) {
+                        return res.status(409).send({ message: "Seat is already occupied" });
                     }
 
-                    const newBooking = new Booking({
-                        userId: req.user.id,
-                        guestEmail: null,
-                        flightId,
-                        bookingReference,
-                        status: "pending",
-                        totalAmount,
-                        isActive: true
-                    });
+                    const totalAmount = seat.class === "business"
+                        ? flight.businessPrice
+                        : flight.basePrice;
 
-                    return newBooking.save()
-                        .then(result => {
-                            return Flight.findById(flightId)
-                                .then(flight => {
+                    const bookingReference = "F606-" + Date.now();
+
+                    return Booking.findOne({ bookingReference })
+                        .then(existingBooking => {
+                            if (existingBooking) {
+                                return res.status(409).send({ message: "Booking Reference already exists" });
+                            }
+
+                            const newBooking = new Booking({
+                                userId: req.user.id,
+                                guestEmail: null,
+                                flightId,
+                                bookingReference,
+                                status: "pending",
+                                totalAmount,
+                                isActive: true
+                            });
+
+                            return newBooking.save()
+                                .then(result => {
                                     return res.status(201).send({
                                         message: "Booking created successfully",
                                         bookingReference: result.bookingReference,
@@ -56,6 +75,7 @@ module.exports.createBookingUser = (req, res) => {
                                             arrivalTime: flight.arrivalTime,
                                             status: flight.status
                                         },
+                                        seatClass: seat.class,
                                         totalAmount: result.totalAmount,
                                         status: result.status
                                     });
@@ -68,7 +88,7 @@ module.exports.createBookingUser = (req, res) => {
 
 
 module.exports.createBookingGuest = (req, res) => {
-    const { flightId, totalAmount, guestEmail } = req.body;
+    const { flightId, seatId, guestEmail } = req.body;
 
     if (!guestEmail || !guestEmail.includes("@")) {
         return res.status(400).send({ message: "Valid guest email is required" });
@@ -76,8 +96,8 @@ module.exports.createBookingGuest = (req, res) => {
     if (!flightId) {
         return res.status(400).send({ message: "Flight ID is required" });
     }
-    if (!totalAmount) {
-        return res.status(400).send({ message: "Total Amount is required" });
+    if (!seatId) {
+        return res.status(400).send({ message: "Seat ID is required" });
     }
 
     return Flight.findById(flightId)
@@ -89,28 +109,45 @@ module.exports.createBookingGuest = (req, res) => {
                 return res.status(400).send({ message: "Cannot book an inactive flight" });
             }
 
-            const bookingReference = "F606-" + Date.now();
-
-            return Booking.findOne({ bookingReference })
-                .then(existingBooking => {
-                    if (existingBooking) {
-                        return res.status(409).send({ message: "Booking Reference already exists" });
+            return Seat.findById(seatId)
+                .then(seat => {
+                    if (!seat) {
+                        return res.status(404).send({ message: "Seat not found" });
+                    }
+                    if (String(seat.flightId) !== String(flightId)) {
+                        return res.status(400).send({ message: "Seat does not belong to this flight" });
+                    }
+                    if (!seat.isActive) {
+                        return res.status(400).send({ message: "Seat is not available" });
+                    }
+                    if (seat.isOccupied) {
+                        return res.status(409).send({ message: "Seat is already occupied" });
                     }
 
-                    const newBooking = new Booking({
-                        userId: null,
-                        guestEmail,
-                        flightId,
-                        bookingReference,
-                        status: "pending",
-                        totalAmount,
-                        isActive: true
-                    });
+                    const totalAmount = seat.class === "business"
+                        ? flight.businessPrice
+                        : flight.basePrice;
 
-                    return newBooking.save()
-                        .then(result => {
-                            return Flight.findById(flightId)
-                                .then(flight => {
+                    const bookingReference = "F606-" + Date.now();
+
+                    return Booking.findOne({ bookingReference })
+                        .then(existingBooking => {
+                            if (existingBooking) {
+                                return res.status(409).send({ message: "Booking Reference already exists" });
+                            }
+
+                            const newBooking = new Booking({
+                                userId: null,
+                                guestEmail,
+                                flightId,
+                                bookingReference,
+                                status: "pending",
+                                totalAmount,
+                                isActive: true
+                            });
+
+                            return newBooking.save()
+                                .then(result => {
                                     return res.status(201).send({
                                         message: "Booking created successfully",
                                         bookingReference: result.bookingReference,
@@ -121,6 +158,7 @@ module.exports.createBookingGuest = (req, res) => {
                                             arrivalTime: flight.arrivalTime,
                                             status: flight.status
                                         },
+                                        seatClass: seat.class,
                                         totalAmount: result.totalAmount,
                                         status: result.status
                                     });
@@ -203,10 +241,24 @@ module.exports.cancelBookingUser = (req, res) => {
         if (!result) {
             return res.status(404).send({ message: "Booking not found" });
         }
-        return res.status(200).send({
-            message: "Booking cancelled successfully",
-            result
-        });
+
+        // Free all seats claimed under this booking
+        return BookingPassenger.find({ bookingId: result._id, isActive: true })
+            .then(bkps => {
+                const seatIds = bkps.map(b => b.seatId);
+                return BookingPassenger.updateMany(
+                    { bookingId: result._id },
+                    { isActive: false }
+                )
+                .then(() => Seat.updateMany(
+                    { _id: { $in: seatIds } },
+                    { isOccupied: false }
+                ))
+                .then(() => res.status(200).send({
+                    message: "Booking cancelled successfully",
+                    result
+                }));
+            });
     })
     .catch(err => errorHandler(err, req, res));
 };
@@ -236,10 +288,24 @@ module.exports.cancelBookingGuest = (req, res) => {
         if (!result) {
             return res.status(404).send({ message: "Booking not found" });
         }
-        return res.status(200).send({
-            message: "Booking cancelled successfully",
-            result
-        });
+
+        // Free all seats claimed under this booking
+        return BookingPassenger.find({ bookingId: result._id, isActive: true })
+            .then(bkps => {
+                const seatIds = bkps.map(b => b.seatId);
+                return BookingPassenger.updateMany(
+                    { bookingId: result._id },
+                    { isActive: false }
+                )
+                .then(() => Seat.updateMany(
+                    { _id: { $in: seatIds } },
+                    { isOccupied: false }
+                ))
+                .then(() => res.status(200).send({
+                    message: "Booking cancelled successfully",
+                    result
+                }));
+            });
     })
     .catch(err => errorHandler(err, req, res));
 };
@@ -340,7 +406,7 @@ module.exports.updateBookingStatus = (req, res) => {
                 message: `Your booking ${result.bookingReference} has been confirmed.`,
                 referenceId: result._id,
                 referenceModel: "Booking"
-            });
+            }).catch(err => console.error("Notification save failed:", err));
         }
 
         return res.status(200).send({

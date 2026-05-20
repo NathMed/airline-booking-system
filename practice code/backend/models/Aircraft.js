@@ -17,7 +17,7 @@ const aircraftSchema = new mongoose.Schema({
 		type: Number,
 		required: [true, "Input total seat number"],
 		min: [150, "Aircraft must have at least 150 seats"],
-		max: [250, "Aircraft must have at most 250 seats"]
+		max: [300, "Aircraft must have at most 300 seats"]
 	},
 
 	isActive: {

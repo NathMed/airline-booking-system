@@ -48,7 +48,13 @@ const flightSchema = new mongoose.Schema({
 
 	basePrice: {
 		type: Number,
-		required: [true, "Base price is required"],
+		required: [true, "Economy price is required"],
+		min: [0, "Price must not be negative"]
+	},
+
+	businessPrice: {
+		type: Number,
+		required: [true, "Business class price is required"],
 		min: [0, "Price must not be negative"]
 	},
 

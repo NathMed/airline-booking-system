@@ -81,9 +81,13 @@ module.exports.markAsRead = (req, res) => {
             if (!notification) {
                 return res.status(404).send({ message: "Notification not found" });
             }
-            if (String(notification.userId) !== req.user.id) {
+
+            const isOwner = notification.userId && String(notification.userId) === req.user.id;
+            const isBroadcast = !notification.userId;
+            if (!isOwner && !isBroadcast) {
                 return res.status(403).send({ message: "Unauthorized to update this notification" });
             }
+
             if (notification.isRead) {
                 return res.status(400).send({ message: "Notification is already marked as read" });
             }

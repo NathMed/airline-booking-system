@@ -1193,7 +1193,7 @@ function buildSeatMap(body, nextBtn) {
   }
 
   const f = state.bk.flight;
-  const bizPrice = f.basePrice * 2;
+  const bizPrice = f.businessPrice ?? f.basePrice * 2;
   const ecoPrice = f.basePrice;
 
   body.innerHTML = `
@@ -1247,7 +1247,9 @@ function selectSeat(seatId) {
 function updateSeatDisplay(nextBtn) {
   const s = state.bk.seat;
   if (!s) return;
-  const price = s.class === 'business' ? state.bk.flight.basePrice * 2 : state.bk.flight.basePrice;
+  const price = s.class === 'business'
+    ? (state.bk.flight.businessPrice ?? state.bk.flight.basePrice * 2)
+    : state.bk.flight.basePrice;
   const valEl   = document.getElementById('seat-selected-val');
   const priceEl = document.getElementById('seat-price-val');
   if (valEl)   valEl.style.color   = 'var(--ok)';
@@ -1360,7 +1362,9 @@ function renderStep3Review(body, nextBtn) {
   const f = state.bk.flight;
   const s = state.bk.seat;
   const p = state.bk.passenger;
-  const price = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+  const price = s?.class === 'business'
+    ? (f.businessPrice ?? f.basePrice * 2)
+    : f.basePrice;
 
   nextBtn.textContent = `✈ Pay ₱${price?.toLocaleString()} →`;
   nextBtn.disabled = false;
@@ -1454,12 +1458,13 @@ async function submitBooking() {
       };
     }
 
-    // 2. Create booking
+    // 2. Create booking — backend now computes the price from seatId + flight
     const bkRes = await api('POST', '/bookings/user/create-booking', {
       flightId: f._id,
-      totalAmount: price
+      seatId: s._id
     });
     const bookingId = bkRes.bookingId;
+    const price = bkRes.totalAmount; // use the server-computed price
     state.bk.bookingId = bookingId;
 
     // 3. Create booking passenger (claim seat)
@@ -1498,7 +1503,9 @@ async function submitBooking() {
     loadNotifBadge();
   } catch(e) {
     next.disabled = false;
-    const p = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+    const p = s?.class === 'business'
+      ? (f.businessPrice ?? f.basePrice * 2)
+      : f.basePrice;
     next.textContent = `✈ Pay ₱${p?.toLocaleString()} →`;
     const msg = e.data?.message || 'Booking failed. Please try again.';
     if (errEl) { errEl.textContent = msg; errEl.style.display = 'block'; }
@@ -1511,7 +1518,9 @@ function renderConfirmation() {
   const f = state.bk.flight;
   const s = state.bk.seat;
   const p = state.bk.passenger;
-  const price = s?.class === 'business' ? f.basePrice * 2 : f.basePrice;
+  const price = s?.class === 'business'
+    ? (f.businessPrice ?? f.basePrice * 2)
+    : f.basePrice;
 
   // Hide footer navigation for confirmation
   document.getElementById('bk-footer-info').innerHTML = '';

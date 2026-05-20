@@ -14,7 +14,7 @@ module.exports.createPaymentUser = (req, res) => {
     if (!paymentMethod) {
         return res.status(400).send({ message: "Please choose your preferred payment method" });
     }
-    if (!amount) {
+    if (amount === undefined || amount === null) {
         return res.status(400).send({ message: "Amount input is required" });
     }
 
@@ -62,7 +62,7 @@ module.exports.createPaymentUser = (req, res) => {
                                         message: `Your booking ${updatedBooking.bookingReference} has been confirmed.`,
                                         referenceId: updatedBooking._id,
                                         referenceModel: "Booking"
-                                    });
+                                    }).catch(err => console.error("Notification save failed:", err));
                                 }
                                 return res.status(201).send({
                                     message: "Payment created and booking confirmed successfully",
@@ -87,7 +87,7 @@ module.exports.createPaymentGuest = (req, res) => {
     if (!paymentMethod) {
         return res.status(400).send({ message: "Please choose your preferred payment method" });
     }
-    if (!amount) {
+    if (amount === undefined || amount === null) {
         return res.status(400).send({ message: "Amount input is required" });
     }
     if (!guestEmail || !guestEmail.includes("@")) {
@@ -138,7 +138,7 @@ module.exports.createPaymentGuest = (req, res) => {
                                         message: `Your booking ${updatedBooking.bookingReference} has been confirmed.`,
                                         referenceId: updatedBooking._id,
                                         referenceModel: "Booking"
-                                    });
+                                    }).catch(err => console.error("Notification save failed:", err));
                                 }
                                 return res.status(201).send({
                                     message: "Payment created and booking confirmed successfully",
@@ -272,7 +272,7 @@ module.exports.updatePaymentStatus = (req, res) => {
                                 message: `Your booking ${updatedBooking.bookingReference} has been confirmed.`,
                                 referenceId: updatedBooking._id,
                                 referenceModel: "Booking"
-                            });
+                            }).catch(err => console.error("Notification save failed:", err));
                         }
                         return res.status(200).send({
                             message: "Payment marked as paid and booking confirmed",

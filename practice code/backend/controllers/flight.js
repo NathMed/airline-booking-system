@@ -90,7 +90,7 @@ module.exports.getFlightById = (req, res) => {
 // ADMIN LEVEL ACCESS
 
 module.exports.createFlight = (req, res) => {
-	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, basePrice, originTerminal, destinationTerminal } = req.body;
+	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, basePrice, businessPrice, originTerminal, destinationTerminal } = req.body;
 
 	if (!airlineId) {
 		return res.status(400).send({ message: "Airline ID required" });
@@ -113,8 +113,14 @@ module.exports.createFlight = (req, res) => {
 	if (!arrivalTime) {
 		return res.status(400).send({ message: "Arrival Time required" });
 	}
-	if (!basePrice) {
-		return res.status(400).send({ message: "Base Price required" });
+	if (basePrice === undefined || basePrice === null) {
+		return res.status(400).send({ message: "Economy price (basePrice) required" });
+	}
+	if (businessPrice === undefined || businessPrice === null) {
+		return res.status(400).send({ message: "Business class price (businessPrice) required" });
+	}
+	if (businessPrice <= basePrice) {
+		return res.status(400).send({ message: "Business class price must be greater than economy price" });
 	}
 
 	return Airline.findById(airlineId)
@@ -169,6 +175,7 @@ module.exports.createFlight = (req, res) => {
 												arrivalTime,
 												status: "scheduled",
 												basePrice,
+												businessPrice,
 												originTerminal: originTerminal || null,
 												destinationTerminal: destinationTerminal || null,
 												isActive: true
@@ -176,7 +183,6 @@ module.exports.createFlight = (req, res) => {
 
 											return newFlight.save()
 												.then(savedFlight => {
-													
 													const seatDocuments = generateSeatDocuments(
 														savedFlight._id,
 														aircraft.totalSeats
@@ -214,23 +220,33 @@ module.exports.getAllFlights = (req, res) => {
 };
 
 module.exports.updateFlight = (req, res) => {
-	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, originTerminal, destinationTerminal } = req.body;
+	const { airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, businessPrice, originTerminal, destinationTerminal } = req.body;
+
+	if (basePrice !== undefined && businessPrice !== undefined && businessPrice <= basePrice) {
+		return res.status(400).send({ message: "Business class price must be greater than economy price" });
+	}
+
+	const updates = {};
+	if (airlineId !== undefined)             updates.airlineId             = airlineId;
+	if (aircraftId !== undefined)            updates.aircraftId            = aircraftId;
+	if (originAirportId !== undefined)       updates.originAirportId       = originAirportId;
+	if (destinationAirportId !== undefined)  updates.destinationAirportId  = destinationAirportId;
+	if (flightNumber !== undefined)          updates.flightNumber          = flightNumber;
+	if (departureTime !== undefined)         updates.departureTime         = departureTime;
+	if (arrivalTime !== undefined)           updates.arrivalTime           = arrivalTime;
+	if (status !== undefined)               updates.status                = status;
+	if (basePrice !== undefined)             updates.basePrice             = basePrice;
+	if (businessPrice !== undefined)         updates.businessPrice         = businessPrice;
+	if (originTerminal !== undefined)        updates.originTerminal        = originTerminal || null;
+	if (destinationTerminal !== undefined)   updates.destinationTerminal   = destinationTerminal || null;
+
+	if (Object.keys(updates).length === 0) {
+		return res.status(400).send({ message: "At least one field is required to update" });
+	}
 
 	return Flight.findByIdAndUpdate(
 		req.params.id,
-		{
-			airlineId,
-			aircraftId,
-			originAirportId,
-			destinationAirportId,
-			flightNumber,
-			departureTime,
-			arrivalTime,
-			status,
-			basePrice,
-			originTerminal: originTerminal || null,
-			destinationTerminal: destinationTerminal || null
-		},
+		updates,
 		{ new: true }
 	)
 	.then(result => {
@@ -246,7 +262,7 @@ module.exports.updateFlight = (req, res) => {
 				message: `Flight ${result.flightNumber} has been ${status}.`,
 				referenceId: result._id,
 				referenceModel: "Flight"
-			});
+			}).catch(err => console.error("Notification save failed:", err));
 		}
 
 		return res.status(200).send({
