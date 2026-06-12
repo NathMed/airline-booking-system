@@ -44,7 +44,7 @@ The Airline Booking System is a web-based platform designed to facilitate flight
 * **Out-of-Scope:** Actual credit card or e-wallet processing (mock payments only), real-time radar tracking, and global distribution system (GDS) live sync.
 
 ### 3.4 Technology Stack
-* **Frontend:** HTML/CSS, Bootstrap
+* **Frontend:** HTML/CSS, Bootstrap, Vue.js
 * **Backend:** Node.js, Express.js
 * **Database:** MongoDB
 * **API Testing:** Postman
@@ -58,7 +58,7 @@ The Airline Booking System is a **standalone web application** designed to provi
 
 ### 4.2 Product Functions
 * **Flight Search & Discovery:** Multi-criteria search (One-way, Round-trip, Multi-city) based on origin, destination, and travel dates.
-* **Interactive Booking Engine:** A multi-step workflow including real-time seat selection via a cabin map and optional travel add-ons (baggage, meals).
+* **Interactive Booking Engine:** A multi-step workflow including real-time seat selection via a cabin map.
 * **User & Passenger Management:** Distinct handling of User Accounts (login/profile) and Passenger Manifests (legal travel documents) to support group bookings and guest checkouts.
 * **Flight Status Tracking:** Real-time search functionality for users to check the arrival and departure status of specific flight numbers.
 * **Administrative Dashboard:** A secure interface for staff to manage flight schedules, update seat availability, and export passenger manifests.
@@ -77,8 +77,6 @@ The Airline Booking System is a **standalone web application** designed to provi
 * **Connectivity:** It is assumed that users have a stable internet connection to access real-time flight data.
 * **Data Source:** Flight schedules and pricing are assumed to be managed via the Admin Dashboard or a local mock JSON server for this iteration.
 * **Mock Payment:** Payment processing is assumed to be handled via internal wallet system (purely internal logic). No real financial transactions occur
-* **Mock Geolocation Logic:** For testing and demonstration purposes, the system utilizes a deterministic location-mapping logic rather than a live Browser API. The 'From' field is pre-populated based on a defined Test Profile (e.g., defaulting to 'MNL' for Manila) to ensure consistent UI behavior during the evaluation phase. Manual overrides remain available for all users.
-* **Real-time pricing sync:** Stretch Goal and will only be implemented if the core features are completed first.
 
 ## 5. Visual Mockup Reference 
 > [!IMPORTANT]
@@ -106,14 +104,13 @@ The Airline Booking System is a **standalone web application** designed to provi
 | Screen / Component | Description | Key UI Elements |
 | :--- | :--- | :--- |
 | Hero / Landing | The entry point for all users. | Search widget (One-way/Round-trip) Background aircraft image with Top-Down Linear Gradient. |
-| Search Widget | The primary data-entry tool. | From/To dropdowns, Departure Date picker, Passenger count, ""Book now!"" button. |
+| Search Widget | The primary data-entry tool. | From/To dropdowns, Departure Date picker, Passenger count, "Book now!" button. |
 | Featured Destinations | Dynamic grid of top travel spots. | 2-column responsive grid, fixed aspect-ratio images, location detection "Traveling from your location." |
-| Interactive Cabin | Seat selection interface. | 2D Seat Map, Legend (Available, Occupied, Selected), ""Seat Locked"" timer logic. | 
+| Interactive Cabin | Seat selection interface. | 2D Seat Map, Legend (Available, Occupied, Selected), "Seat Locked" timer logic. | 
 | Discover / Editorial Cards | Highlights news, app promos, and destination features. | 3-column card grid, thumbnail images, short descriptions, inline text CTAs (Read More, Download Now, Explore More). | 
-| Cheap Flights / Deals Section | Algorithmically curated low-fare suggestions. |  low-fare suggestions. 2-column card grid, destination image, city name, date range, flight duration, price. |
 | Footer | Site-wide navigation and brand links. |  Multi-column link groups (Other Offerings, About Us, Corporate Travel, AskMH), newsletter Subscribe CTA, social media icons, legal links. |
 | Passenger Details Page | Collects legal traveler information for all passengers on the booking. | Name, birthdate, gender, nationality, passport, expiry date, contact info fields. |
-| Payment Page | Mock payment entry form. No real transactions. | Card number, expiry CVV fields. Stripe Test Mode badge. |
+| Payment Page | Mock payment entry form. No real transactions. | 
 | Search Results Page | Displays flights matching the user's query with filter controls. | Flight result cards (airline, time, duration, stops, price), filter sidebar(price,time, stops). |
 | Booking Confirmation | Success screen displayed after a booking is finalized. | Unique PNR code, flight summary, passenger list, digital boarding pass preview with QR code. |
 | Digital Boarding Pass | Mobile-friendly standalone view of a confirmed flight ticket. | Flight number, route, passenger name, seat number, departure time, QR code for gate scanning. |
@@ -146,7 +143,6 @@ The Airline Booking System is a **standalone web application** designed to provi
 ### 6.1 Smart Flight Search Engine
 The core of the application, designed to handle complex travel queries with a focus on speed and accuracy.
     - **Multi-Type Routing**: "One-Way", "Multi-City", and "Round-trip"
-    - **Geolocation-Aware**: Automatically pre-fills the "From" field with the user's nearest airport using navigator.geolocation. Requires user permission. Falls back to manual input if denied.
     - **Dynamic Filtering**: Allows users to narrow results by price range, departure time, and number of stops without a full page reload.
 ### 6.2 Multi-Passenger Booking Management
 Recognizing the relationship between Users and Passengers, the system allows for flexible group bookings.
@@ -155,9 +151,9 @@ Recognizing the relationship between Users and Passengers, the system allows for
     - **Document Validation**: Built-in logic to ensure Passport/ID formats and expiration dates are valid before proceeding to payment.
 ### 6.3 "Flight 606" User Dashboard
 A personalized hub for managing the travel lifecycle.
-    - **Digital Boarding Passes**: Generates a mobile-friendly view of flight details and QR codes upon successful booking.
+    - **Digital Boarding Passes**: Generates a mobile-friendly view of flight details.
     - **Trip History**: A chronological archive of past and upcoming flights.
-    - **Reward Points Tracking**: (Optional/Stretch Goal) Displays loyalty points earned per kilometer traveled.
+    
 
 
 ## 7. Functional Requirements
@@ -194,7 +190,7 @@ A personalized hub for managing the travel lifecycle.
       - Session timeout > Restart process.
 
 - **Use Case 4**: Booking Management
-    - **Description**: Users can view or cancel bookings.
+    - **Description**: Users can view, reschedule or cancel bookings.
     - **Actors**: Registered End User
     - **Process**: Retrieve bookings > Display details.
     - **Outputs**: Booking list or updated status.
@@ -241,6 +237,17 @@ A personalized hub for managing the travel lifecycle.
     - **Error Handling**:
       - Seat already taken > Prompt reselection
 
+- **Use Case 9**: Flight Rescheduling
+    - **Description**: Users can change their selected flight to a new date or time, updating their existing booking.
+    - **Actors**: Registered End User
+    - **Inputs**: New flight ID, new seat ID
+    - **Preconditions**: User has an existing active booking that is not cancelled.
+    - **Process**: User selects new flight > System validates availability and calculates fare difference > User confirms > System frees old seat and occupies new seat > Booking is updated.
+    - **Outputs**: Updated booking record with new flight and seat assignment.
+    - **Error Handling**:
+        - New flight unavailable > Show error message.
+        - Seat already taken > Prompt reselection.      
+
 
 ## 8. Non-Functional Requirements
 - **Performance**: 
@@ -266,20 +273,19 @@ A personalized hub for managing the travel lifecycle.
   - **Airport**: { id, name, iataCode, city, country, isActive }
   - **Booking**: { id, userId, guestEmail, flightId, bookingReference, status, totalAmount, isActive }
   - **BookingPassenger**: { id, bookingId, passengerId, seatId, ticketNumber, isActive }
-  - **Flight**: { id, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, terminal, isActive }
-  - **Itinerary**: { id, userId, name, isActive }
-  - **ItineraryBooking**: { id, itineraryId, bookingId, sortOrder }
+  - **Flight**: { id, airlineId, aircraftId, originAirportId, destinationAirportId, flightNumber, departureTime, arrivalTime, status, basePrice, businessPrice, originTerminal, destinationTerminal, isActive }
+  - **Itinerary**: { id, userId, guestEmail, bookings:[bookingId, type, gate], isActive }
   - **Notification**: { id, userId, bookingId, type, message, isRead, emailSent, sentAt, isActive }
-  - **Passenger**: { id, firstName, lastName, gender, dateOfBirth, nationality, passportNumber, passportExpiry, isActive }
+  - **Passenger**: { id, userId, firstName, lastName, gender, dateOfBirth, email, nationality, passportNumber, passportExpiry, phone, isProfileSaved, isActive }
   - **Payment**: { id, bookingId, paymentMethod, amount, status, transactionId, paidAt }
   - **Seat**: { id, flightId, seatNumber, class, isOccupied, lockedUntil, isActive }
   - **TravelersProfile**: { id, userId, firstName, lastName, gender, dateOfBirth, nationality, passportNumber, passportExpiry, isActive } 
   - **User**: { id, email, password, phone, isAdmin, isActive }
 
 - **Database Requirements**: 
-  - Use MongoDB for storing user, product, and order data.
+  - Use MongoDB for storing user, flight, passenger and booking data.
 - **Data Storage and Retrieval**: 
-  - Users can retrieve their account and order information.
+  - Users can retrieve their account, booking and itinerary information.
 
 ## 10. External Interface Requirements
 - **User Interfaces**: 
@@ -294,8 +300,6 @@ A personalized hub for managing the travel lifecycle.
   - Admin Dashboard
   - Digital Boarding Pass
 
-- **API Interfaces**: 
-  - Payment gateway API (e.g., Stripe API) for processing payments.
 - **Hardware Interfaces**: 
   - 'Hardware Agnostic' it runs on every device with modern browser installed in their device of choice e.g. smartphone, tablet, laptop, personal computer. 
 - **Software Interfaces**: 
@@ -313,15 +317,12 @@ A personalized hub for managing the travel lifecycle.
 - **PNR(Passenger Name Record)**: A unique alphanumeric booking reference code generated for each confirmed reservation. 
 - **Postman**: A collaborative platform and tool used by developers to design, test, and debug API endpoints during development. 
 - **REST(Representational State Transfer)**: A standard architectural style for designing networked APIs using HTTP methods. 
-- **SKU**: Stock Keeping Unit.
 - **UID(User Identification)**: A unique identifier automatically assigned to each registered user account in the system.
 
 ## 12. Appendices
 - **Supporting Information**: 
-  - User flow diagrams- TBD
   - Wireframes- TBD
-  - Trello Board- TBD
-  - Figma Mockups- TBD
+  - Trello Board- https://trello.com/b/chEYCUpN/phase-1-airline-booking-system
 
 
 ### 12.1 Revision History
@@ -332,3 +333,5 @@ A personalized hub for managing the travel lifecycle.
 | **v1.1** | 2026-04-14 | **Structural Updates:** Added details to Section 3.4 & 5; Integrated System Features 7 & 8; Expanded Glossary and Appendices. |
 | **v1.2** | 2026-04-15 | **Content Refinement:** Improved functional requirement descriptions and addressed missing system details. |
 | **v1.3** | 2026-05-06 | **Technical Pivot:** Replaced live Geolocation API with **Mock Location Logic** for demo stability; updated **Typography** and **Color Palette** to align with v1.0 Design System assets. |
+| **v1.4** | 2026-06-13 | **Feature & Data Refinement:** Added Use Case 9 (Rescheduling); Refactored Itinerary Data Model to normalize gate data; Cleaned up Section 5 & 9 typos; Updated Appendices links. |
+| **v1.5** | 2026-06-13 | **Scope & Data Model Alignment:** Cleaned up documentation to match the deployed application. Removed unbuilt scope items (passenger manifest exports, QR code integration, geolocation logic, dynamic sidebar filtering, and loyalty points). Updated the Payment UI specifications to reflect the implemented method selector. Synchronized database schemas (embedded Itinerary bookings, updated Notification fields) and removed unused external interfaces. |
